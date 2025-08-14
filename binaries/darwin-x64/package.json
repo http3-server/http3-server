@@ -1,7 +1,7 @@
 {
 	"name": "@http3-server/darwin-x64",
 	"type": "module",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "HTTP/3 implementation for Darwin x64",
 	"license": "MIT-0",
 	"author": "Jonathan Neal",
@@ -15,13 +15,13 @@
 		"url": "https://github.com/http3-server/http3-server/issues"
 	},
 	"exports": {
-		".": "./msh3_native.node"
+		".": "./http3.node"
 	},
 	"files": [
+		"http3.node",
 		"libmsh3.dylib",
 		"libmsquic.2.dylib",
 		"LICENSE.md",
-		"msh3_native.node",
 		"NOTICE"
 	]
 }

@@ -1,7 +1,7 @@
 {
 	"name": "@http3-server/native",
 	"type": "module",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "HTTP/3 implementation for Node.js",
 	"license": "MIT-0",
 	"author": "Jonathan Neal",
@@ -10,7 +10,7 @@
 		"url": "https://github.com/http3-server/http3-server.git",
 		"directory": "packages/native"
 	},
-	"homepage": "https://github.com/http3-server/http3-server/tree/main/packages/http3-server",
+	"homepage": "https://github.com/http3-server/http3-server/tree/main/packages/native",
 	"bugs": {
 		"url": "https://github.com/http3-server/http3-server/issues"
 	},
@@ -37,11 +37,11 @@
 		"platform.js"
 	],
 	"optionalDependencies": {
-		"@http3-server/darwin-arm64": "0.1.0",
-		"@http3-server/darwin-x64": "0.1.0",
-		"@http3-server/linux-arm64": "0.1.0",
-		"@http3-server/linux-x64": "0.1.0",
-		"@http3-server/win32-arm64": "0.1.0",
-		"@http3-server/win32-x64": "0.1.0"
+		"@http3-server/darwin-arm64": "0.1.1",
+		"@http3-server/darwin-x64": "0.1.1",
+		"@http3-server/linux-arm64": "0.1.1",
+		"@http3-server/linux-x64": "0.1.1",
+		"@http3-server/win32-arm64": "0.1.1",
+		"@http3-server/win32-x64": "0.1.1"
 	}
 }
