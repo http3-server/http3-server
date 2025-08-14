@@ -1,0 +1,11 @@
+{
+	"name": "http3.root",
+	"type": "module",
+	"version": "0.1.0",
+	"description": "A collection of HTTP/3 packages",
+	"private": true,
+	"workspaces": [
+		"binaries/*",
+		"packages/*"
+	]
+}

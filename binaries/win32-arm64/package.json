@@ -1,0 +1,27 @@
+{
+	"name": "@http3-server/win32-arm64",
+	"type": "module",
+	"version": "0.1.0",
+	"description": "HTTP/3 implementation for Windows ARM64",
+	"license": "MIT-0",
+	"author": "Jonathan Neal",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/http3-server/http3-server.git",
+		"directory": "binaries/win32-arm64"
+	},
+	"homepage": "https://github.com/http3-server/http3-server/tree/main/binaries/win32-arm64",
+	"bugs": {
+		"url": "https://github.com/http3-server/http3-server/issues"
+	},
+	"exports": {
+		".": "./msh3_native.node"
+	},
+	"files": [
+		"LICENSE.md",
+		"msh3_native.node",
+		"msh3.dll",
+		"msquic.dll",
+		"NOTICE"
+	]
+}
