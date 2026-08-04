@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast:
+    name: Fast checks (Node ${{ matrix.node }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24, 26]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run verify
+      - run: npm run pack:check
+
+  platform:
+    name: ${{ matrix.platform }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - macos-15
+          - macos-15-intel
+          - ubuntu-24.04-arm
+          - ubuntu-24.04
+          - windows-11-arm
+          - windows-2025
+        node: [22, 24, 26]
+        include:
+          - runner: macos-15
+            platform: darwin-arm64
+          - runner: macos-15-intel
+            platform: darwin-x64
+          - runner: ubuntu-24.04-arm
+            platform: linux-arm64
+          - runner: ubuntu-24.04
+            platform: linux-x64
+          - runner: windows-11-arm
+            platform: win32-arm64
+          - runner: windows-2025
+            platform: win32-x64
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run pack:check
+
+  protocol:
+    name: Protocol / ${{ matrix.platform }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: macos-15, platform: darwin-arm64, node: 24, python_architecture: arm64 }
+          - { runner: macos-15-intel, platform: darwin-x64, node: 24, python_architecture: x64 }
+          - { runner: ubuntu-24.04-arm, platform: linux-arm64, node: 24, python_architecture: arm64 }
+          - { runner: ubuntu-24.04, platform: linux-x64, node: 22, python_architecture: x64 }
+          - { runner: ubuntu-24.04, platform: linux-x64, node: 24, python_architecture: x64 }
+          - { runner: ubuntu-24.04, platform: linux-x64, node: 26, python_architecture: x64 }
+          # The protocol client is a separate process, so it can use Windows x64 emulation.
+          - { runner: windows-11-arm, platform: win32-arm64, node: 24, python_architecture: x64 }
+          - { runner: windows-2025, platform: win32-x64, node: 24, python_architecture: x64 }
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          architecture: ${{ matrix.python_architecture }}
+      - run: npm ci
+      - run: npm run integration
+
+  browser:
+    name: Browser WebTransport / Chrome 151
+    needs: fast
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - id: chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: 151.0.7922.71
+          install-dependencies: true
+      - run: npm ci
+      - run: npm run browser
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+
+  stress:
+    name: Native concurrency stress
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: npm ci
+      - run: npm run stress
+        env:
+          HTTP3_STRESS_RUNS: 3

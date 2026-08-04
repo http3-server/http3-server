@@ -1,0 +1,141 @@
+name: Release candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      producer_run_id:
+        description: Successful jsxtools/msh3-node build workflow run ID
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  pack:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/download-artifact@v7
+        with:
+          name: builds
+          path: native-builds
+          repository: jsxtools/msh3-node
+          run-id: ${{ inputs.producer_run_id }}
+          github-token: ${{ secrets.MSH3_ARTIFACT_TOKEN }}
+      - run: npm ci
+      - run: node scripts/import-binaries.js native-builds
+      - run: npm run verify
+      - run: npm run check:release:strict
+      - run: npm run pack:release
+      - uses: actions/upload-artifact@v6
+        with:
+          name: npm-release-candidate
+          path: release/
+          if-no-files-found: error
+          retention-days: 14
+
+  smoke:
+    needs: pack
+    name: Packed smoke / ${{ matrix.platform }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - macos-15
+          - macos-15-intel
+          - ubuntu-24.04-arm
+          - ubuntu-24.04
+          - windows-11-arm
+          - windows-2025
+        node: [22, 24, 26]
+        include:
+          - { runner: macos-15, platform: darwin-arm64 }
+          - { runner: macos-15-intel, platform: darwin-x64 }
+          - { runner: ubuntu-24.04-arm, platform: linux-arm64 }
+          - { runner: ubuntu-24.04, platform: linux-x64 }
+          - { runner: windows-11-arm, platform: win32-arm64 }
+          - { runner: windows-2025, platform: win32-x64 }
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - uses: actions/download-artifact@v7
+        with:
+          name: npm-release-candidate
+          path: release
+      - run: npm ci
+      - run: npm run candidate:test
+
+  protocol:
+    needs: pack
+    name: Packed protocol / ${{ matrix.platform }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: macos-15, platform: darwin-arm64, node: 24, python_architecture: arm64 }
+          - { runner: macos-15-intel, platform: darwin-x64, node: 24, python_architecture: x64 }
+          - { runner: ubuntu-24.04-arm, platform: linux-arm64, node: 24, python_architecture: arm64 }
+          - { runner: ubuntu-24.04, platform: linux-x64, node: 22, python_architecture: x64 }
+          - { runner: ubuntu-24.04, platform: linux-x64, node: 24, python_architecture: x64 }
+          - { runner: ubuntu-24.04, platform: linux-x64, node: 26, python_architecture: x64 }
+          # The protocol client is a separate process, so it can use Windows x64 emulation.
+          - { runner: windows-11-arm, platform: win32-arm64, node: 24, python_architecture: x64 }
+          - { runner: windows-2025, platform: win32-x64, node: 24, python_architecture: x64 }
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          architecture: ${{ matrix.python_architecture }}
+      - uses: actions/download-artifact@v7
+        with:
+          name: npm-release-candidate
+          path: release
+      - run: npm ci
+      - run: npm run candidate:test:protocol
+
+  browser:
+    needs: pack
+    name: Packed browser / Chrome 151 / Node 24
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - id: chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: 151.0.7922.71
+          install-dependencies: true
+      - uses: actions/download-artifact@v7
+        with:
+          name: npm-release-candidate
+          path: release
+      - run: npm ci
+      - run: npm run candidate:test:browser
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}

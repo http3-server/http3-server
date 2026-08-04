@@ -1,0 +1,8 @@
+{
+	"formatVersion": 3,
+	"producerCommit": "ffe42c21e69b24a818bb94f2938d4305eca3290e",
+	"msh3Commit": "92f23c72b50b0714d7cd39850e7b97e8ed1129e1",
+	"msquicCommit": "87b53085d76bd7920d490a6f226c9999b6614d14",
+	"msh3PatchSha256": "d6cede70757935a065697ec89cdae6a2fc55c1f60f9a9ed2390843124c26bc58",
+	"msquicPatchSha256": "cd48a4161c710b368f4b683ed739cab95f673606fa69e79290e382ca6893d66c"
+}

@@ -1,0 +1,41 @@
+name: Promotion soak
+
+on:
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+    inputs:
+      duration_seconds:
+        description: Soak duration in seconds
+        required: true
+        default: "1800"
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: promotion-soak
+  cancel-in-progress: false
+
+jobs:
+  soak:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: npm ci
+      - run: npm run soak
+        env:
+          HTTP3_SOAK_SECONDS: ${{ inputs.duration_seconds || '1800' }}
+          HTTP3_SOAK_MAX_RSS_GROWTH_MB: 64
+          HTTP3_SOAK_REQUESTS: 32

@@ -1,0 +1,31 @@
+{
+	"formatVersion": 3,
+	"producer": "msh3-node",
+	"producerCommit": "ffe42c21e69b24a818bb94f2938d4305eca3290e",
+	"platform": "linux-x64",
+	"msh3Commit": "92f23c72b50b0714d7cd39850e7b97e8ed1129e1",
+	"msquicCommit": "87b53085d76bd7920d490a6f226c9999b6614d14",
+	"msh3PatchSha256": "d6cede70757935a065697ec89cdae6a2fc55c1f60f9a9ed2390843124c26bc58",
+	"msquicPatchSha256": "cd48a4161c710b368f4b683ed739cab95f673606fa69e79290e382ca6893d66c",
+	"declarationSha256": "5140cc4ae656a0da057db95ea69d2f2e50e33bb22e962f77087e692ba3ecc77a",
+	"files": [
+		{
+			"name": "http3.node",
+			"bytes": 333065,
+			"sha256": "e574c521da27162107e5c4d8a1bc58589e662e6f9bab2ed9125008c69766482a",
+			"architecture": "x64"
+		},
+		{
+			"name": "libmsh3.so",
+			"bytes": 7023529,
+			"sha256": "d8d48a2e52a431cb7012b5135c1b66cb526dcde5a525da8742e171f755b5ad1a",
+			"architecture": "x64"
+		},
+		{
+			"name": "libmsquic.so",
+			"bytes": 5667016,
+			"sha256": "be7d9ba152474102d35813d953008068aeb4d2da3c03cc49453c997f0f77de56",
+			"architecture": "x64"
+		}
+	]
+}

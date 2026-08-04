@@ -1,0 +1,31 @@
+{
+	"formatVersion": 3,
+	"producer": "msh3-node",
+	"producerCommit": "ffe42c21e69b24a818bb94f2938d4305eca3290e",
+	"platform": "darwin-x64",
+	"msh3Commit": "92f23c72b50b0714d7cd39850e7b97e8ed1129e1",
+	"msquicCommit": "87b53085d76bd7920d490a6f226c9999b6614d14",
+	"msh3PatchSha256": "d6cede70757935a065697ec89cdae6a2fc55c1f60f9a9ed2390843124c26bc58",
+	"msquicPatchSha256": "cd48a4161c710b368f4b683ed739cab95f673606fa69e79290e382ca6893d66c",
+	"declarationSha256": "5140cc4ae656a0da057db95ea69d2f2e50e33bb22e962f77087e692ba3ecc77a",
+	"files": [
+		{
+			"name": "http3.node",
+			"bytes": 233648,
+			"sha256": "d2d8ba9d7cb5ce33b11da0d626f336e703ecb88436e8371aacba4149caf21e70",
+			"architecture": "x64"
+		},
+		{
+			"name": "libmsh3.dylib",
+			"bytes": 5222784,
+			"sha256": "7bc5d145663672d2d870b5874106b7dc112aea617dbfe5bbe798b563095b990c",
+			"architecture": "x64"
+		},
+		{
+			"name": "libmsquic.2.dylib",
+			"bytes": 4487888,
+			"sha256": "3a60a8be11b6d38ebb8fda18a325052fd2f3599b16a20822436a8779ce946c6e",
+			"architecture": "x64"
+		}
+	]
+}

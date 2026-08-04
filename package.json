@@ -1,0 +1,43 @@
+{
+	"name": "http3.root",
+	"type": "module",
+	"version": "0.1.1",
+	"description": "A collection of HTTP/3 packages",
+	"private": true,
+	"workspaces": [
+		"packages/*"
+	],
+	"files": [
+		"native-baseline.json"
+	],
+	"scripts": {
+		"baseline": "node scripts/baseline.js",
+		"browser": "node scripts/test-browser.js",
+		"binaries:check": "node scripts/import-binaries.js --check",
+		"binaries:import": "node scripts/import-binaries.js",
+		"binaries:import:local": "node scripts/import-binaries.js --local",
+		"check:release": "node scripts/check-release.js",
+		"check:release:strict": "node scripts/check-release.js --require-manifests",
+		"candidate:check": "npm run verify && npm run check:release:strict && npm run pack:check",
+		"candidate:test": "node scripts/verify-candidate.js release && node scripts/test-candidate.js release",
+		"candidate:test:browser": "node scripts/verify-candidate.js release && node scripts/test-candidate-browser.js release",
+		"candidate:test:protocol": "node scripts/verify-candidate.js release && node scripts/test-candidate-protocol.js release",
+		"check:workspace": "node scripts/check-release.js --workspace",
+		"lint": "biome check",
+		"lint:fix": "biome check --write",
+		"integration": "node scripts/run-integration.js",
+		"pack:check": "node scripts/pack-release.js --dry-run --local",
+		"pack:check:browser": "node scripts/pack-release.js --dry-run --local --browser",
+		"pack:check:protocol": "node scripts/pack-release.js --dry-run --local --protocol",
+		"pack:release": "node scripts/pack-release.js --destination=release",
+		"soak": "node --expose-gc scripts/run-soak.js",
+		"stress": "node scripts/run-stress.js",
+		"test": "node --test scripts/*.test.js && npm test --workspaces --if-present",
+		"version:set": "node scripts/set-version.js",
+		"verify": "npm run lint && npm test && npm run check:workspace"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.13",
+		"typescript": "7.0.2"
+	}
+}
