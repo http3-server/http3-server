@@ -5,7 +5,7 @@ server. It owns the JavaScript API, native loader, platform packages, tests, and
 release process.
 
 The native addon is built in
-[`jsxtools/msh3-node`](https://github.com/jsxtools/msh3-node). Keeping the native
+[`http3-server/msh3-node`](https://github.com/http3-server/msh3-node). Keeping the native
 builder separate lets its cross-platform matrix evolve without coupling every build
 tool to the published packages. The handoff between the repositories is a checksummed
 `builds` artifact; see [RELEASING.md](RELEASING.md).

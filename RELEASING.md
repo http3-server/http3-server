@@ -5,7 +5,7 @@ successful `msh3-node` build, never assembled from runs or local machines.
 
 ## 1. Produce native bundles
 
-1. Merge the native change in `jsxtools/msh3-node`.
+1. Merge the native change in `http3-server/msh3-node`.
 2. Wait for all six build jobs and the combined `builds` artifact.
 3. Download and extract that artifact. Each platform directory must contain
    `build-manifest.json` alongside its three runtime files.

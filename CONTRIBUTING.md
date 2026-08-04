@@ -3,7 +3,7 @@
 ## Repository responsibilities
 
 - Change native C++ bindings, the MSH3 patch, or cross-platform compilation in
-  `jsxtools/msh3-node`.
+  `http3-server/msh3-node`.
 - Change the JavaScript API, package selection, documentation, or release metadata in
   this repository.
 - Move a binary between repositories only with `npm run binaries:import`; do not copy
