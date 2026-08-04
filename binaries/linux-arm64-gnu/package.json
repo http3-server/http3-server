@@ -1,8 +1,8 @@
 {
-	"name": "@http3-server/linux-arm64",
+	"name": "@http3-server/linux-arm64-gnu",
 	"type": "module",
 	"version": "0.2.0",
-	"description": "HTTP/3 implementation for Linux ARM64",
+	"description": "HTTP/3 implementation for Linux arm64 with glibc",
 	"license": "MIT-0",
 	"engines": {
 		"node": ">=22"
@@ -14,12 +14,13 @@
 	"cpu": [
 		"arm64"
 	],
+	"libc": "glibc",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/http3-server/http3-server.git",
-		"directory": "binaries/linux-arm64"
+		"directory": "binaries/linux-arm64-gnu"
 	},
-	"homepage": "https://github.com/http3-server/http3-server/tree/main/binaries/linux-arm64",
+	"homepage": "https://github.com/http3-server/http3-server/tree/main/binaries/linux-arm64-gnu",
 	"bugs": {
 		"url": "https://github.com/http3-server/http3-server/issues"
 	},

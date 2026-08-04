@@ -5,6 +5,41 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { detectLinuxLibc, getPackageForCurrentPlatform, getPlatformKey } from "./install.js";
+
+const report = (glibcVersionRuntime) => ({
+	getReport: () => ({ header: glibcVersionRuntime ? { glibcVersionRuntime } : {} }),
+});
+
+test("selects GNU and musl Linux packages", () => {
+	assert.equal(detectLinuxLibc(report("2.36")), "glibc");
+	assert.equal(detectLinuxLibc(report()), "musl");
+	assert.equal(
+		getPackageForCurrentPlatform({
+			platform: "linux",
+			architecture: "x64",
+			byteOrder: "LE",
+			report: report("2.36"),
+		}),
+		"@http3-server/linux-x64-gnu"
+	);
+	assert.equal(
+		getPackageForCurrentPlatform({
+			platform: "linux",
+			architecture: "arm64",
+			byteOrder: "LE",
+			report: report(),
+		}),
+		"@http3-server/linux-arm64-musl"
+	);
+});
+
+test("leaves non-Linux platform keys unchanged", () => {
+	assert.equal(
+		getPlatformKey({ platform: "darwin", architecture: "arm64", byteOrder: "LE" }),
+		"darwin arm64 LE"
+	);
+});
 
 test("the installer runs directly from a path containing spaces", () => {
 	const root = mkdtempSync(join(tmpdir(), "http3 installer "));

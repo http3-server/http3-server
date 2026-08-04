@@ -1,8 +1,15 @@
 {
-	"formatVersion": 3,
+	"formatVersion": 4,
 	"producer": "msh3-node",
-	"producerCommit": "0112364c447f5ac1b6867b6f8ceba88e72526e68",
+	"producerCommit": "07dcc8f6f51a173b2c4c423f220375a713be4a03",
 	"platform": "darwin-x64",
+	"target": {
+		"os": "darwin",
+		"cpu": "x64"
+	},
+	"build": {
+		"baseline": "darwin-x64"
+	},
 	"msh3Commit": "92f23c72b50b0714d7cd39850e7b97e8ed1129e1",
 	"msquicCommit": "87b53085d76bd7920d490a6f226c9999b6614d14",
 	"msh3PatchSha256": "d6cede70757935a065697ec89cdae6a2fc55c1f60f9a9ed2390843124c26bc58",
@@ -12,7 +19,7 @@
 		{
 			"name": "http3.node",
 			"bytes": 233648,
-			"sha256": "5f2432bf10588036543e7579623465c4d06fcda98f0f9cb332e9b35bca3af883",
+			"sha256": "a6baae3db6a0398666de40304f2e3ea26ada5caa36fd732d18ad7347002473a5",
 			"architecture": "x64"
 		},
 		{

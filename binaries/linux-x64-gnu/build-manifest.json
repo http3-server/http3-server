@@ -2,13 +2,15 @@
 	"formatVersion": 4,
 	"producer": "msh3-node",
 	"producerCommit": "07dcc8f6f51a173b2c4c423f220375a713be4a03",
-	"platform": "darwin-arm64",
+	"platform": "linux-x64-gnu",
 	"target": {
-		"os": "darwin",
-		"cpu": "arm64"
+		"os": "linux",
+		"cpu": "x64",
+		"libc": "glibc"
 	},
 	"build": {
-		"baseline": "darwin-arm64"
+		"baseline": "node:24-bullseye",
+		"minimumLibcVersion": "2.31"
 	},
 	"msh3Commit": "92f23c72b50b0714d7cd39850e7b97e8ed1129e1",
 	"msquicCommit": "87b53085d76bd7920d490a6f226c9999b6614d14",
@@ -18,21 +20,21 @@
 	"files": [
 		{
 			"name": "http3.node",
-			"bytes": 247824,
-			"sha256": "3dd371cdc62d301be64d51b63079bde029ddf838af55ad6b6a1cffd86a7ecee4",
-			"architecture": "arm64"
+			"bytes": 329472,
+			"sha256": "e4f1408cd57ee3e453dc404523b039d9a891144768ea929c6a80b85e6bc22532",
+			"architecture": "x64"
 		},
 		{
-			"name": "libmsh3.dylib",
-			"bytes": 4202992,
-			"sha256": "b868e33eac404ed1b92e27832481261932d09eae31abd58a96eae7e245e26e77",
-			"architecture": "arm64"
+			"name": "libmsh3.so",
+			"bytes": 6879936,
+			"sha256": "0cf2b35ef72c2d3eed022c47443f0fa9d55a9facacc7b40c6ce9b23e7f1e345e",
+			"architecture": "x64"
 		},
 		{
-			"name": "libmsquic.2.dylib",
-			"bytes": 3450864,
-			"sha256": "00957421686372eca9f35166d43f88e3fc7408a3b377b4a5d62436ddc0664890",
-			"architecture": "arm64"
+			"name": "libmsquic.so",
+			"bytes": 5586272,
+			"sha256": "650b6bd9477524ff989bcacfbca268332078c9dcdd00d0f9559099b45d697102",
+			"architecture": "x64"
 		}
 	]
 }

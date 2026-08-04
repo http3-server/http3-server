@@ -1,7 +1,8 @@
-# HTTP/3 Runtime for Linux x64
+# HTTP/3 Runtime for Linux arm64 with glibc
 
-`@http3-server/linux-x64` contains the prebuilt Node.js addon, MSH3 library, and MsQuic
-library used by [`http3s`](https://www.npmjs.com/package/http3s) on Linux x64.
+`@http3-server/linux-arm64-gnu` contains the prebuilt Node.js addon, MSH3 library, and
+MsQuic library used by [`http3s`](https://www.npmjs.com/package/http3s) on glibc-based
+Linux arm64 systems.
 
 Applications should install `http3s`; its native loader selects this optional package
 automatically. The included `build-manifest.json` records the exact producer revision,

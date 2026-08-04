@@ -14,15 +14,31 @@ export const platforms = Object.freeze([
 		files: ["http3.node", "libmsh3.dylib", "libmsquic.2.dylib"],
 	},
 	{
-		id: "linux-arm64",
+		id: "linux-arm64-gnu",
 		os: "linux",
 		cpu: "arm64",
+		libc: "glibc",
 		files: ["http3.node", "libmsh3.so", "libmsquic.so"],
 	},
 	{
-		id: "linux-x64",
+		id: "linux-arm64-musl",
+		os: "linux",
+		cpu: "arm64",
+		libc: "musl",
+		files: ["http3.node", "libmsh3.so", "libmsquic.so"],
+	},
+	{
+		id: "linux-x64-gnu",
 		os: "linux",
 		cpu: "x64",
+		libc: "glibc",
+		files: ["http3.node", "libmsh3.so", "libmsquic.so"],
+	},
+	{
+		id: "linux-x64-musl",
+		os: "linux",
+		cpu: "x64",
+		libc: "musl",
 		files: ["http3.node", "libmsh3.so", "libmsquic.so"],
 	},
 	{
@@ -38,6 +54,27 @@ export const platforms = Object.freeze([
 		files: ["http3.node", "msh3.dll", "msquic.dll"],
 	},
 ]);
+
+/** Detect the Linux C library used by the current Node.js process. */
+export function detectLinuxLibc(report = process.report) {
+	try {
+		const header = /** @type {{ glibcVersionRuntime?: string }} */ (report?.getReport().header);
+		return header.glibcVersionRuntime ? "glibc" : "musl";
+	} catch {
+		return "musl";
+	}
+}
+
+export function isCurrentPlatform(
+	platform,
+	{
+		os = process.platform,
+		cpu = process.arch,
+		libc = os === "linux" ? detectLinuxLibc() : undefined,
+	} = {}
+) {
+	return platform.os === os && platform.cpu === cpu && platform.libc === libc;
+}
 
 export function detectNativeArchitecture(path) {
 	const bytes = readFileSync(path);

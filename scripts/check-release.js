@@ -71,6 +71,9 @@ for (const platform of platforms) {
 	if (JSON.stringify(pkg.cpu) !== JSON.stringify([platform.cpu])) {
 		failures.push(`${pkg.name} has the wrong cpu constraint`);
 	}
+	if (pkg.libc !== platform.libc) {
+		failures.push(`${pkg.name} has the wrong libc constraint`);
+	}
 	if (nativePackage.optionalDependencies[pkg.name] !== releaseVersion) {
 		failures.push(`@http3-server/native does not select ${pkg.name}@${releaseVersion}`);
 	}
@@ -101,6 +104,19 @@ for (const platform of platforms) {
 	) {
 		failures.push(`${platform.id} has invalid provenance`);
 		continue;
+	}
+	if (
+		manifest.target?.os !== platform.os ||
+		manifest.target?.cpu !== platform.cpu ||
+		manifest.target?.libc !== platform.libc
+	) {
+		failures.push(`${platform.id} manifest has the wrong target`);
+	}
+	if (
+		platform.libc &&
+		(!manifest.build?.baseline || !/^\d+(?:\.\d+)+$/.test(manifest.build.minimumLibcVersion))
+	) {
+		failures.push(`${platform.id} manifest lacks a concrete libc baseline`);
 	}
 	if (
 		manifest.producerCommit !== nativeBaseline.producerCommit ||

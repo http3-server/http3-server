@@ -19,11 +19,11 @@ npm run binaries:import:local
 This uses a sibling `../msh3-node` checkout by default. Set `MSH3_NODE_ROOT` when the
 producer lives elsewhere.
 
-The release importer still requires all six bundles from one workflow run.
-Each v3 build manifest records the exact `msh3-node` producer commit, and
+The release importer still requires all eight bundles from one workflow run.
+Each v4 build manifest records the exact target and `msh3-node` producer commit, and
 `native-baseline.json` pins that revision for the release monorepo. Any producer
 source, patch, declaration, or build-tool change that can affect bundles therefore
-requires a deliberate baseline update and one new complete six-platform import;
+requires a deliberate baseline update and one new complete eight-target import;
 stale or mixed-revision bundles are rejected.
 
 ## Working agreement
@@ -32,9 +32,9 @@ stale or mixed-revision bundles are rejected.
 2. Add or update a test with behavior changes.
 3. Run `npm run verify` before requesting review.
 4. Treat `npm run check:release:strict` as the binary-provenance gate. It is expected to
-   fail until all six platform bundles from one native build have been imported.
+   fail until all eight target bundles from one native build have been imported.
 5. Keep package versions in lockstep. Use `npm run version:set -- <version>` rather than
-   editing nine manifests independently.
+   editing eleven manifests independently.
 
 Native changes should land in the builder first. The npm monorepo change should record
 the successful native workflow run used for the import in its pull request description.
@@ -78,7 +78,7 @@ stream interface so the conforming and hostile clients remain pinned together.
 Prefer one of these reviewable units:
 
 - native protocol or binding change plus its builder validation;
-- one complete six-platform binary refresh;
+- one complete eight-target binary refresh;
 - JavaScript API and tests;
 - release metadata or documentation.
 

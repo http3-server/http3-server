@@ -15,10 +15,33 @@ import {
 	MESSAGE_FOR_UNSUPPORTED_PLATFORM,
 } from "./install-constants.js";
 
+/** Detect the Linux C library used by the current Node.js process. */
+export const detectLinuxLibc = (report = process.report) => {
+	try {
+		const header = /** @type {{ glibcVersionRuntime?: string }} */ (report?.getReport().header);
+		return header.glibcVersionRuntime ? "glibc" : "musl";
+	} catch {
+		return "musl";
+	}
+};
+
+/** Return the package-selection key for a runtime. */
+export const getPlatformKey = ({
+	platform = process.platform,
+	architecture = arch(),
+	byteOrder = endianness(),
+	report = process.report,
+} = {}) =>
+	[
+		platform,
+		architecture,
+		byteOrder,
+		...(platform === "linux" ? [detectLinuxLibc(report)] : []),
+	].join(" ");
+
 /** Returns the package name for the current platform. */
-export const getPackageForCurrentPlatform = () => {
-	// Create platform key similar to esbuild
-	const platformKey = `${process.platform} ${arch()} ${endianness()}`;
+export const getPackageForCurrentPlatform = (runtime) => {
+	const platformKey = getPlatformKey(runtime);
 
 	if (platformKey in knownPlatformPackages) {
 		return knownPlatformPackages[platformKey];
@@ -69,7 +92,7 @@ export const generatePlatformErrorMessage = (
 	requestedPkg,
 	foundPlatform = /** @type {object} */ (null)
 ) => {
-	const currentPlatform = `${process.platform} ${arch()} ${endianness()}`;
+	const currentPlatform = getPlatformKey();
 
 	let message = MESSAGE_FOR_PLATFORM_ERROR(requestedPkg, currentPlatform);
 
@@ -98,7 +121,7 @@ if (
 	try {
 		const pkg = getPackageForCurrentPlatform();
 
-		console.log(`Platform detected: ${process.platform} ${process.arch}`);
+		console.log(`Platform detected: ${getPlatformKey()}`);
 		console.log(`Required package: ${pkg}`);
 
 		try {

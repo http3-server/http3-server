@@ -48,8 +48,10 @@
 	"optionalDependencies": {
 		"@http3-server/darwin-arm64": "0.2.0",
 		"@http3-server/darwin-x64": "0.2.0",
-		"@http3-server/linux-arm64": "0.2.0",
-		"@http3-server/linux-x64": "0.2.0",
+		"@http3-server/linux-arm64-gnu": "0.2.0",
+		"@http3-server/linux-arm64-musl": "0.2.0",
+		"@http3-server/linux-x64-gnu": "0.2.0",
+		"@http3-server/linux-x64-musl": "0.2.0",
 		"@http3-server/win32-arm64": "0.2.0",
 		"@http3-server/win32-x64": "0.2.0"
 	}

@@ -5,8 +5,10 @@ export const knownPlatformPackages = /** @type {Record<string, string>} */ ({
 	"darwin x64 LE": "@http3-server/darwin-x64",
 
 	// Linux
-	"linux arm64 LE": "@http3-server/linux-arm64",
-	"linux x64 LE": "@http3-server/linux-x64",
+	"linux arm64 LE glibc": "@http3-server/linux-arm64-gnu",
+	"linux arm64 LE musl": "@http3-server/linux-arm64-musl",
+	"linux x64 LE glibc": "@http3-server/linux-x64-gnu",
+	"linux x64 LE musl": "@http3-server/linux-x64-musl",
 
 	// Windows
 	"win32 arm64 LE": "@http3-server/win32-arm64",

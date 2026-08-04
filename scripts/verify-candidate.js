@@ -16,7 +16,7 @@ function sha256(path) {
 const manifestPath = join(candidateDirectory, "candidate-manifest.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 if (manifest.formatVersion !== 1) throw new Error("Unsupported candidate manifest format");
-const expectedPackages = manifest.scope === "local" ? 4 : 9;
+const expectedPackages = manifest.scope === "local" ? 4 : 11;
 if (manifest.scope !== "local" && manifest.scope !== "release") {
 	throw new Error("Candidate manifest has an unsupported scope");
 }
@@ -50,7 +50,7 @@ for (const pkg of manifest.packages) {
 	if (pkg.os && pkg.cpu) {
 		if (
 			!pkg.buildManifest ||
-			pkg.buildManifest.formatVersion !== 3 ||
+			pkg.buildManifest.formatVersion !== 4 ||
 			pkg.buildManifest.producer !== "msh3-node"
 		) {
 			throw new Error(`${pkg.name} lacks native build provenance`);
@@ -59,6 +59,14 @@ for (const pkg of manifest.packages) {
 			throw new Error(`${pkg.name} lacks an exact producer revision`);
 		}
 		producerCommits.add(pkg.buildManifest.producerCommit);
+		const expectedLibc = Array.isArray(pkg.libc) ? pkg.libc[0] : pkg.libc;
+		if (
+			pkg.buildManifest.target?.os !== pkg.os[0] ||
+			pkg.buildManifest.target?.cpu !== pkg.cpu[0] ||
+			pkg.buildManifest.target?.libc !== expectedLibc
+		) {
+			throw new Error(`${pkg.name} has mismatched native target provenance`);
+		}
 		for (const file of pkg.buildManifest.files) {
 			if (!file.sha256 || !file.bytes || !file.architecture) {
 				throw new Error(`${pkg.name} has incomplete native checksums`);

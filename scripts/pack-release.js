@@ -17,7 +17,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { platforms } from "./platforms.js";
+import { isCurrentPlatform, platforms } from "./platforms.js";
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const npmExecPath = process.env.npm_execpath;
@@ -39,7 +39,7 @@ if (destination) {
 }
 
 const selectedPlatforms = localOnly
-	? platforms.filter(({ os, cpu }) => os === process.platform && cpu === process.arch)
+	? platforms.filter((platform) => isCurrentPlatform(platform))
 	: platforms;
 if (selectedPlatforms.length === 0) {
 	throw new Error(`No platform package matches ${process.platform}-${process.arch}`);
@@ -137,6 +137,7 @@ try {
 			publishConfig: sortedRecord(packageJson.publishConfig),
 			os: packageJson.os,
 			cpu: packageJson.cpu,
+			libc: packageJson.libc,
 			files: packed.files.map(({ path, size }) => ({ path, bytes: size })),
 			buildManifest,
 		});

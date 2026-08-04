@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { getPackageForCurrentPlatform } from "../packages/native/install.js";
 
 export function run(command, args, options = {}) {
 	const result = spawnSync(command, args, { stdio: "inherit", ...options });
@@ -29,7 +30,7 @@ export function readCandidate(candidateDirectory) {
 
 export function installCandidate(candidateDirectory) {
 	const candidate = readCandidate(candidateDirectory);
-	const platformName = `@http3-server/${process.platform}-${process.arch}`;
+	const platformName = getPackageForCurrentPlatform();
 	const required = [
 		"http3s",
 		"@http3-server/dev-certificates",
@@ -42,15 +43,17 @@ export function installCandidate(candidateDirectory) {
 	}
 
 	const root = mkdtempSync(join(tmpdir(), "http3-candidate-test-"));
-	const dependencies = Object.fromEntries(
-		required.map((name) => [
-			name,
-			`file:${join(candidate.directory, candidate.packageByName.get(name).filename)}`,
-		])
+	const fileSpec = (name) =>
+		`file:${join(candidate.directory, candidate.packageByName.get(name).filename)}`;
+	const dependencies = Object.fromEntries(required.map((name) => [name, fileSpec(name)]));
+	const optionalDependencies = Object.fromEntries(
+		candidate.manifest.packages
+			.filter((pkg) => pkg.os && pkg.cpu && pkg.name !== platformName)
+			.map(({ name }) => [name, fileSpec(name)])
 	);
 	writeFileSync(
 		join(root, "package.json"),
-		`${JSON.stringify({ private: true, type: "module", dependencies }, null, "\t")}\n`
+		`${JSON.stringify({ private: true, type: "module", dependencies, optionalDependencies }, null, "\t")}\n`
 	);
 	runNpm(["install", "--offline", "--no-audit", "--no-fund"], {
 		cwd: root,

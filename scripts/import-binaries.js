@@ -16,7 +16,7 @@ import {
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { detectNativeArchitecture, platforms } from "./platforms.js";
+import { detectNativeArchitecture, isCurrentPlatform, platforms } from "./platforms.js";
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const nativeBaseline = JSON.parse(readFileSync(join(projectRoot, "native-baseline.json"), "utf8"));
@@ -132,7 +132,7 @@ function main() {
 
 	const imports = [];
 	const selectedPlatforms = localOnly
-		? platforms.filter(({ os, cpu }) => os === process.platform && cpu === process.arch)
+		? platforms.filter((platform) => isCurrentPlatform(platform))
 		: platforms;
 
 	if (selectedPlatforms.length === 0) {
@@ -157,6 +157,20 @@ function main() {
 		}
 		if (manifest.platform !== platform.id) {
 			throw new Error(`${platform.id} contains a manifest for ${manifest.platform}`);
+		}
+		if (
+			manifest.target?.os !== platform.os ||
+			manifest.target?.cpu !== platform.cpu ||
+			manifest.target?.libc !== platform.libc
+		) {
+			throw new Error(`${platform.id} contains mismatched target provenance`);
+		}
+		if (
+			platform.libc &&
+			(!manifest.build?.baseline ||
+				!/^[0-9]+(?:\.[0-9]+)+$/.test(manifest.build.minimumLibcVersion))
+		) {
+			throw new Error(`${platform.id} lacks a concrete libc baseline`);
 		}
 		if (
 			manifest.producerCommit !== nativeBaseline.producerCommit ||

@@ -28,7 +28,7 @@ GitHub dependency alerts and `npm audit`.
 A relevant advisory bypasses the normal release cadence, but not verification:
 
 1. update and pin the affected dependency;
-2. rebuild all six native platforms from one complete workflow run;
+2. rebuild all eight native targets from one complete workflow run;
 3. import that run atomically and generate a fresh candidate;
 4. run the full release gates against the packed candidate; and
 5. publish the fixed packages together, then disclose according to the advisory.

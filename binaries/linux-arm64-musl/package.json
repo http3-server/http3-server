@@ -1,8 +1,8 @@
 {
-	"name": "@http3-server/linux-x64",
+	"name": "@http3-server/linux-arm64-musl",
 	"type": "module",
 	"version": "0.2.0",
-	"description": "HTTP/3 implementation for Linux x64",
+	"description": "HTTP/3 implementation for Linux arm64 with musl",
 	"license": "MIT-0",
 	"engines": {
 		"node": ">=22"
@@ -12,14 +12,15 @@
 		"linux"
 	],
 	"cpu": [
-		"x64"
+		"arm64"
 	],
+	"libc": "musl",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/http3-server/http3-server.git",
-		"directory": "binaries/linux-x64"
+		"directory": "binaries/linux-arm64-musl"
 	},
-	"homepage": "https://github.com/http3-server/http3-server/tree/main/binaries/linux-x64",
+	"homepage": "https://github.com/http3-server/http3-server/tree/main/binaries/linux-arm64-musl",
 	"bugs": {
 		"url": "https://github.com/http3-server/http3-server/issues"
 	},

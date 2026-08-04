@@ -1,6 +1,6 @@
-@http3-server/linux-arm64
+@http3-server/linux-arm64-musl
 Copyright (c) 2025 Jonathan Neal
-Repository: https://github.com/http3-server/http3-server/tree/main/packages/http3-server-linux-arm64
+Repository: https://github.com/http3-server/http3-server/tree/main/binaries/linux-arm64-musl
 
 This package contains compiled binaries from the following projects:
 

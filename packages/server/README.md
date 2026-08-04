@@ -9,10 +9,10 @@ WebTransport API.
 npm install http3s
 ```
 
-`http3s` supports Node.js 22, 24, and 26 on macOS, Linux, and Windows on arm64 and
-x64. The matching native package is selected automatically. Running a server requires
-a TLS certificate and private key, and the listening UDP port must be reachable by
-clients.
+`http3s` supports Node.js 22, 24, and 26 on macOS, Linux, and Windows on arm64 and x64.
+Both glibc and musl Linux systems, including Alpine Linux, are supported. The matching
+native package is selected automatically. Running a server requires a TLS certificate
+and private key, and the listening UDP port must be reachable by clients.
 
 Runtime support is currently Node.js only. Bun and Deno can load many Node-API addons,
 but `http3s` is not yet part of their tested support matrix. The separate

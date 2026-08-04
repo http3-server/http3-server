@@ -1,6 +1,6 @@
 # Changelog
 
-All notable user-visible changes are recorded here. The nine published packages share
+All notable user-visible changes are recorded here. The eleven published packages share
 one version and are released together.
 
 ## 0.2.0 — Unreleased
@@ -13,7 +13,8 @@ First coordinated release candidate for the complete package set.
 - WebTransport session acceptance, datagrams, and client-created bidirectional streams.
 - Bounded connection, stream, header, body, response, and WebTransport resource limits.
 - Graceful shutdown with a configurable drain deadline.
-- Prebuilt native packages for macOS, Linux, and Windows on arm64 and x64.
+- Prebuilt native packages for macOS and Windows on arm64 and x64, plus glibc and musl
+  Linux on both architectures.
 - Zero-dependency development certificates for Node.js, Bun, and Deno.
 - A complete Vite and browser WebTransport example.
 - Checksummed native provenance, packed-candidate verification, cross-platform protocol

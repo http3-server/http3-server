@@ -10,9 +10,11 @@ instead of depending on this package directly:
 npm install http3s
 ```
 
-The six platform packages are optional dependencies, so npm installs only the package
-that matches macOS, Linux, or Windows on arm64 or x64. The postinstall check reports a
-clear error when no supported native runtime is available.
+The eight native packages are optional dependencies. Current npm releases install the
+package matching macOS or Windows on arm64 or x64, or the matching glibc/musl Linux
+target. Older npm releases that do not filter the `libc` package field may retain both
+Linux variants for the current CPU; the loader still selects only the correct one. The
+postinstall check reports a clear error when no supported native runtime is available.
 
 Every platform package contains a checksummed build manifest tying its native addon,
 MSH3 library, and MsQuic library to one exact producer revision. See the
