@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+	<rect width="20" height="20" fill="#040031" />
+	<g fill="#02b7d7">
+		<!-- P bowl -->
+		<path
+			d="M13.691 4.705a2.883 2.629 0 0 1 0 5.258"
+			fill="none"
+			stroke="#02b7d7"
+			stroke-width="1.235"
+		/>
+
+		<!-- Three shared vertical stems with rounded lower terminals -->
+		<path d="M6.072 4.705h1.235v10.698a.618.618 0 0 1-1.235 0Z" />
+		<path d="M9.995 4.705h1.235v10.698a.618.618 0 0 1-1.235 0Z" />
+		<path d="M13.074 4.705h1.235v10.698a.618.618 0 0 1-1.235 0Z" />
+
+		<!-- H bridge -->
+		<rect x="6.072" y="9.37" width="5.158" height="1.191" />
+
+		<!-- Shared cap for both Ts and the P -->
+		<path d="M3.741 4.124h9.95v1.162h-9.95a.581.581 0 0 1 0-1.162Z" />
+	</g>
+</svg>
