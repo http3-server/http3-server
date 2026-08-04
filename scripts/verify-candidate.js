@@ -32,6 +32,17 @@ for (const pkg of manifest.packages) {
 	if (pkg.version !== manifest.releaseVersion) {
 		throw new Error(`${pkg.name} is not version ${manifest.releaseVersion}`);
 	}
+	if (
+		pkg.publishConfig?.access !== "public" ||
+		pkg.publishConfig?.provenance !== true ||
+		pkg.publishConfig?.registry !== "https://registry.npmjs.org/"
+	) {
+		throw new Error(`${pkg.name} does not enforce public npm publication with provenance`);
+	}
+	const packedPaths = new Set(pkg.files.map(({ path }) => path));
+	if (!packedPaths.has("LICENSE.md") || !packedPaths.has("README.md")) {
+		throw new Error(`${pkg.name} does not contain its license and README`);
+	}
 	const path = join(candidateDirectory, pkg.filename);
 	if (statSync(path).size !== pkg.bytes || sha256(path) !== pkg.sha256) {
 		throw new Error(`${pkg.filename} differs from candidate-manifest.json`);

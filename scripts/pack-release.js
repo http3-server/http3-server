@@ -134,6 +134,7 @@ try {
 			integrity: packed.integrity,
 			dependencies: sortedRecord(packageJson.dependencies),
 			optionalDependencies: sortedRecord(packageJson.optionalDependencies),
+			publishConfig: sortedRecord(packageJson.publishConfig),
 			os: packageJson.os,
 			cpu: packageJson.cpu,
 			files: packed.files.map(({ path, size }) => ({ path, bytes: size })),

@@ -1,7 +1,8 @@
 {
 	"name": "http3.root",
 	"type": "module",
-	"version": "0.1.1",
+	"version": "0.2.0",
+	"packageManager": "npm@11.18.0",
 	"description": "Release workspace for the http3s HTTP/3 and WebTransport server",
 	"private": true,
 	"workspaces": [
@@ -19,6 +20,7 @@
 		"check:release": "node scripts/check-release.js",
 		"check:release:strict": "node scripts/check-release.js --require-manifests",
 		"candidate:check": "npm run verify && npm run check:release:strict && npm run pack:check",
+		"candidate:publish": "node scripts/publish-candidate.js release",
 		"candidate:test": "node scripts/verify-candidate.js release && node scripts/test-candidate.js release",
 		"candidate:test:browser": "node scripts/verify-candidate.js release && node scripts/test-candidate-browser.js release",
 		"candidate:test:protocol": "node scripts/verify-candidate.js release && node scripts/test-candidate-protocol.js release",

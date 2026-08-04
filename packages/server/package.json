@@ -1,7 +1,7 @@
 {
 	"name": "http3s",
 	"type": "module",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "HTTP/3 and WebTransport server for Node.js",
 	"license": "MIT-0",
 	"engines": {
@@ -16,6 +16,11 @@
 	"homepage": "https://github.com/http3-server/http3-server/tree/main/packages/server",
 	"bugs": {
 		"url": "https://github.com/http3-server/http3-server/issues"
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true,
+		"registry": "https://registry.npmjs.org/"
 	},
 	"keywords": [
 		"http3",
@@ -49,6 +54,6 @@
 		"types.d.ts"
 	],
 	"dependencies": {
-		"@http3-server/native": "0.1.1"
+		"@http3-server/native": "0.2.0"
 	}
 }

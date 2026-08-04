@@ -1,7 +1,7 @@
 {
 	"name": "@http3-server/darwin-arm64",
 	"type": "module",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "HTTP/3 implementation for Darwin ARM64",
 	"license": "MIT-0",
 	"engines": {
@@ -23,6 +23,11 @@
 	"bugs": {
 		"url": "https://github.com/http3-server/http3-server/issues"
 	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true,
+		"registry": "https://registry.npmjs.org/"
+	},
 	"exports": {
 		".": "./http3.js",
 		"./http3.node": "./http3.node"
@@ -34,6 +39,7 @@
 		"libmsh3.dylib",
 		"libmsquic.2.dylib",
 		"LICENSE.md",
-		"NOTICE"
+		"NOTICE",
+		"README.md"
 	]
 }

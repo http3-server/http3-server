@@ -28,6 +28,27 @@ const serverPackage = readJson(join(projectRoot, "packages/server/package.json")
 const releaseVersion = serverPackage.version;
 const failures = [];
 
+function checkPublishMetadata(pkg) {
+	if (
+		pkg.publishConfig?.access !== "public" ||
+		pkg.publishConfig?.provenance !== true ||
+		pkg.publishConfig?.registry !== "https://registry.npmjs.org/"
+	) {
+		failures.push(`${pkg.name} does not enforce public npm publication with provenance`);
+	}
+	if (pkg.license !== "MIT-0") failures.push(`${pkg.name} does not declare MIT-0`);
+	if (pkg.repository?.url !== "https://github.com/http3-server/http3-server.git") {
+		failures.push(`${pkg.name} has the wrong source repository`);
+	}
+	if (!pkg.files.includes("LICENSE.md"))
+		failures.push(`${pkg.name} does not publish its license`);
+	if (!pkg.files.includes("README.md")) failures.push(`${pkg.name} does not publish its README`);
+}
+
+checkPublishMetadata(devCertificatesPackage);
+checkPublishMetadata(nativePackage);
+checkPublishMetadata(serverPackage);
+
 if (readJson(join(projectRoot, "package.json")).version !== releaseVersion) {
 	failures.push("root and published package versions differ");
 }
@@ -42,6 +63,7 @@ if (serverPackage.dependencies["@http3-server/native"] !== releaseVersion) {
 for (const platform of platforms) {
 	const directory = join(projectRoot, "binaries", platform.id);
 	const pkg = readJson(join(directory, "package.json"));
+	checkPublishMetadata(pkg);
 	if (pkg.version !== releaseVersion) failures.push(`${pkg.name} version differs`);
 	if (JSON.stringify(pkg.os) !== JSON.stringify([platform.os])) {
 		failures.push(`${pkg.name} has the wrong os constraint`);

@@ -1,0 +1,93 @@
+name: Publish npm release
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_run_id:
+        description: Successful release-candidate workflow run ID
+        required: true
+        type: string
+      version:
+        description: Exact candidate version
+        required: true
+        type: string
+      dist_tag:
+        description: npm distribution tag
+        required: true
+        default: next
+        type: choice
+        options:
+          - next
+          - latest
+      confirmation:
+        description: Type "publish <version>" to authorize publication
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: npm
+    steps:
+      - id: candidate
+        name: Verify completed candidate run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.candidate_run_id }}
+        run: |
+          conclusion="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .conclusion)"
+          event="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .event)"
+          name="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .name)"
+          head_sha="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" --jq .head_sha)"
+          if [[ "$conclusion" != "success" || "$event" != "workflow_dispatch" || "$name" != "Release candidate" ]]; then
+            echo "Run $RUN_ID is not a successful release candidate" >&2
+            exit 1
+          fi
+          echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
+      - name: Verify explicit publication confirmation
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          if [[ "$CONFIRMATION" != "publish $VERSION" ]]; then
+            echo "Confirmation must exactly match: publish $VERSION" >&2
+            exit 1
+          fi
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.candidate.outputs.head_sha }}
+          lfs: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+          package-manager-cache: false
+      - name: Use the pinned release npm CLI
+        run: npm install --global npm@11.18.0
+      - uses: actions/download-artifact@v7
+        with:
+          name: npm-release-candidate
+          path: release
+          run-id: ${{ inputs.candidate_run_id }}
+          github-token: ${{ github.token }}
+      - run: npm ci --ignore-scripts
+      - run: node scripts/verify-candidate.js release
+      - run: npm run candidate:test
+      - name: Publish verified tarballs in dependency order
+        run: >-
+          npm run candidate:publish --
+          --publish
+          --version=${{ inputs.version }}
+          --tag=${{ inputs.dist_tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

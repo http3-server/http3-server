@@ -64,7 +64,8 @@ coverage, and `npm run soak` for a long-lived HTTP/3 + WebTransport memory/clean
 
 The public API and current WebTransport limitations are documented in
 [`packages/server/README.md`](packages/server/README.md). Team workflow and review
-expectations are in [CONTRIBUTING.md](CONTRIBUTING.md).
+expectations are in [CONTRIBUTING.md](CONTRIBUTING.md), and user-visible release notes
+are maintained in [CHANGELOG.md](CHANGELOG.md).
 
 ## Project status
 

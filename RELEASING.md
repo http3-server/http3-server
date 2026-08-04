@@ -1,7 +1,23 @@
 # Releasing
 
 All nine published packages use one version. A release is promoted from a single
-successful `msh3-node` build, never assembled from runs or local machines.
+successful `msh3-node` build, never assembled from runs or local machines. The first
+coordinated version is `0.2.0` and should initially use the `next` distribution tag.
+Version `0.1.0` was published in 2025 for selected native packages only and must not be
+reused.
+
+## 0. Registry and repository prerequisites
+
+The npm organization `http3-server` must exist, the release maintainer must use 2FA,
+and the unscoped `http3s` name must still be available. All package manifests pin the
+public npm registry, public access, and provenance generation.
+
+npm does not allow staged or trusted publishing for a package that has never been
+published. Bootstrap the first release with a short-lived granular npm token that can
+publish the nine package names and bypass publish 2FA. Store it only as the `NPM_TOKEN`
+secret in the protected `npm` GitHub environment; never commit it or place it in a
+repository-level configuration file. Remove the token immediately after the first
+release and complete the trusted-publishing migration in section 5.
 
 ## 1. Produce native bundles
 
@@ -56,19 +72,58 @@ to the private producer workflow artifact. `release/candidate-manifest.json` rec
 package identities, dependency edges, tarball integrity, native checksums, and the
 security-policy checksum.
 
-## 4. Publish in dependency order
+## 4. Publish the verified candidate
 
-After reviewing the tarballs, publish:
+The `Publish npm release` workflow accepts only a completed successful release-candidate
+run, checks out that candidate's exact source commit, downloads its immutable tarball
+artifact, verifies it again, and publishes in dependency order:
 
 1. `@http3-server/dev-certificates`;
 2. the six `@http3-server/<platform>-<arch>` packages;
 3. `@http3-server/native`;
 4. `http3s`.
 
-Use the same npm dist-tag for every package. For experimental releases, prefer `next`.
-Move to `latest` only after the candidate passes the six-platform Node 22/24/26 load
-matrix, the packed protocol/browser gates, and the scheduled promotion soak without
-unbounded memory, hangs, or native crashes.
+After reviewing the candidate artifact, dispatch the workflow with its run ID and exact
+version. The confirmation input deliberately includes the version:
+
+```sh
+gh workflow run publish.yml \
+  --repo http3-server/http3-server \
+  -f candidate_run_id=1234567890 \
+  -f version=0.2.0 \
+  -f dist_tag=next \
+  -f 'confirmation=publish 0.2.0'
+```
+
+The publisher checks all existing versions before changing the registry. A retry skips
+an already-published package only when its registry integrity exactly matches the
+candidate, making recovery from an interrupted nine-package bootstrap safe. It refuses
+live publication outside GitHub Actions.
+
+Use the same npm dist-tag for every package. Move to `latest` only after the candidate
+passes the six-platform Node 22/24/26 load matrix, the packed protocol/browser gates,
+and the scheduled promotion soak without unbounded memory, hangs, or native crashes.
+
+After all packages are visible, create the annotated `v0.2.0` tag and GitHub release
+from the same candidate commit. Never tag a partial publication.
+
+## 5. Replace the bootstrap token
+
+Once every package exists, configure `publish.yml` as its trusted GitHub Actions
+publisher. Allow `npm publish` for the initial migration; staged publication can be
+enabled for later release review:
+
+```sh
+npm trust github @http3-server/dev-certificates \
+  --repo http3-server/http3-server --file publish.yml --allow-publish
+```
+
+Repeat that command for the six platform packages, `@http3-server/native`, and
+`http3s`. Then set each package's publishing access to require 2FA and disallow tokens,
+delete the `NPM_TOKEN` GitHub secret, and verify the next `next` release through OIDC.
+Trusted publishing automatically produces provenance for public packages from this
+public repository.
 
 Publishing remains a deliberate maintainer action. CI creates and verifies candidates
-but does not hold npm credentials or publish automatically yet.
+without publishing. Only a manually confirmed run using the protected `npm` environment
+can change the registry.
