@@ -89,5 +89,3 @@ jobs:
           --publish
           --version=${{ inputs.version }}
           --tag=${{ inputs.dist_tag }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

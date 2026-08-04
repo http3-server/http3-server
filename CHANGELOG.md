@@ -3,7 +3,7 @@
 All notable user-visible changes are recorded here. The eleven published packages share
 one version and are released together.
 
-## 0.2.0 — Unreleased
+## 0.2.0 — 2026-08-04
 
 First coordinated release candidate for the complete package set.
 
