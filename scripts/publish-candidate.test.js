@@ -26,7 +26,7 @@ test("publication plan is complete, pinned, and dependency ordered", () => {
 		plan.map(({ name }) => name),
 		publicationOrder
 	);
-	assert.equal(plan.at(-1).name, "http3-server");
+	assert.equal(plan.at(-1).name, "@http3-server/server");
 });
 
 test("publication plan rejects incomplete or mismatched candidates", () => {

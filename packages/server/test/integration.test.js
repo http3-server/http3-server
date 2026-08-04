@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { HTTP3Server as NativeHTTP3Server } from "@http3-server/native";
-import { fin, HTTP3Server } from "http3-server";
+import { fin, HTTP3Server } from "@http3-server/server";
 
 const execFileAsync = promisify(execFile);
 const python = process.env.AIOQUIC_PYTHON;

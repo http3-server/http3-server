@@ -15,7 +15,7 @@ try {
 		join(root, "smoke.mjs"),
 		`import { HTTP3Server as NativeHTTP3Server } from "@http3-server/native";\n` +
 			`import { ensureDevelopmentCertificate } from "@http3-server/dev-certificates/node";\n` +
-			`import { HTTP3Server } from "http3-server";\n` +
+			`import { HTTP3Server } from "@http3-server/server";\n` +
 			`if (typeof NativeHTTP3Server !== "function" || typeof HTTP3Server !== "function") throw new Error("candidate exports are unavailable");\n` +
 			`const certificate = await ensureDevelopmentCertificate({ directory: ${JSON.stringify(join(root, ".http3-server"))} });\n` +
 			`const server = new HTTP3Server().handle({ stream: () => new Response("ok") });\n` +
@@ -28,7 +28,7 @@ try {
 	writeFileSync(
 		join(root, "types.test.ts"),
 		`import { createDevelopmentCertificate } from "@http3-server/dev-certificates";\n` +
-			`import { HTTP3Server } from "http3-server";\n` +
+			`import { HTTP3Server } from "@http3-server/server";\n` +
 			`const certificate = await createDevelopmentCertificate();\n` +
 			`const hash: Uint8Array = certificate.certificateHash;\n` +
 			`void hash;\n` +

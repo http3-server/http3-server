@@ -1,7 +1,7 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ensureDevelopmentCertificate } from "@http3-server/dev-certificates/node";
-import { HTTP3Server } from "http3-server";
+import { HTTP3Server } from "@http3-server/server";
 import { createServer } from "vite";
 
 const directory = dirname(fileURLToPath(import.meta.url));

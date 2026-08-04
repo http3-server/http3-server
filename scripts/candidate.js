@@ -32,7 +32,7 @@ export function installCandidate(candidateDirectory) {
 	const candidate = readCandidate(candidateDirectory);
 	const platformName = getPackageForCurrentPlatform();
 	const required = [
-		"http3-server",
+		"@http3-server/server",
 		"@http3-server/dev-certificates",
 		"@http3-server/native",
 		platformName,

@@ -7,7 +7,7 @@ import {
 	type Stream,
 	type WebTransportSession,
 	type WebTransportStream,
-} from "http3-server";
+} from "@http3-server/server";
 
 const server = new HTTP3Server().handle({
 	error(error: HTTP3ServerError) {

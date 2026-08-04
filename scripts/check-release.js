@@ -57,7 +57,9 @@ if (devCertificatesPackage.version !== releaseVersion) {
 	failures.push("development certificates and server versions differ");
 }
 if (serverPackage.dependencies["@http3-server/native"] !== releaseVersion) {
-	failures.push("http3-server does not depend on the release version of @http3-server/native");
+	failures.push(
+		"@http3-server/server does not depend on the release version of @http3-server/native"
+	);
 }
 
 for (const platform of platforms) {

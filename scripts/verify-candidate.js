@@ -83,10 +83,10 @@ const nativePackage = manifest.packages.find(({ name }) => name === "@http3-serv
 const devCertificatesPackage = manifest.packages.find(
 	({ name }) => name === "@http3-server/dev-certificates"
 );
-const serverPackage = manifest.packages.find(({ name }) => name === "http3-server");
+const serverPackage = manifest.packages.find(({ name }) => name === "@http3-server/server");
 if (!devCertificatesPackage) throw new Error("Candidate does not contain development certificates");
 if (serverPackage.dependencies?.["@http3-server/native"] !== manifest.releaseVersion) {
-	throw new Error("http3-server has the wrong native dependency edge");
+	throw new Error("@http3-server/server has the wrong native dependency edge");
 }
 for (const name of names) {
 	const pkg = manifest.packages.find((candidatePackage) => candidatePackage.name === name);

@@ -1,7 +1,7 @@
 # Vite + WebTransport
 
-This example runs Vite and `http3-server` as separate servers. Vite serves the page and hot
-module updates over HTTP; the browser connects directly to the HTTP/3 server over UDP.
+This example runs Vite and `@http3-server/server` as separate servers. Vite serves the
+page and hot module updates over HTTP; the browser connects directly to the HTTP/3 server over UDP.
 Vite's HTTP proxy is intentionally not involved.
 
 From the repository root:

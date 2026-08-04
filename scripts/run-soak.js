@@ -6,7 +6,7 @@ import { execFile } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { HTTP3Server } from "http3-server";
+import { HTTP3Server } from "@http3-server/server";
 import { ensureIntegrationClient } from "./integration-client.js";
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
