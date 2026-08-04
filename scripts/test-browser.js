@@ -3,12 +3,13 @@
 
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ensureDevelopmentCertificate } from "@http3-server/dev-certificates/node";
 import { HTTP3Server } from "@http3-server/server";
+import { netLogDiagnostics } from "./netlog-diagnostics.js";
 
 function deferred() {
 	let resolve;
@@ -97,63 +98,6 @@ async function launchChrome(path, userDataDirectory, netLogPath) {
 	} finally {
 		clearTimeout(timeout);
 	}
-}
-
-function netLogDiagnostics(path) {
-	if (!existsSync(path)) return "Chrome did not write a NetLog";
-	const log = JSON.parse(readFileSync(path, "utf8"));
-	const eventNames = new Map(
-		Object.entries(log.constants?.logEventTypes ?? {}).map(([name, id]) => [id, name])
-	);
-	const failedSources = new Set(
-		log.events
-			.filter((event) => {
-				const name = eventNames.get(event.type) ?? "";
-				return (
-					/WEBTRANSPORT_CLIENT_STATE_CHANGED/.test(name) &&
-					event.params?.next_state === "FAILED"
-				);
-			})
-			.map((event) => event.source?.id)
-	);
-	const clientHelloStrings = log.events
-		.filter(
-			(event) =>
-				failedSources.has(event.source?.id) &&
-				eventNames.get(event.type) === "QUIC_SESSION_CRYPTO_FRAME_SENT" &&
-				event.params?.encryption_level === "ENCRYPTION_INITIAL" &&
-				event.params?.bytes
-		)
-		.flatMap(
-			(event) =>
-				Buffer.from(event.params.bytes, "base64")
-					.toString("latin1")
-					.match(/[ -~]{2,}/g) ?? []
-		)
-		.join(" | ");
-	const events = log.events
-		.map((event) => ({
-			name: eventNames.get(event.type) ?? String(event.type),
-			params: event.params,
-			source: event.source?.id,
-		}))
-		.filter(({ name, params, source }) => {
-			const details = JSON.stringify(params ?? {});
-			return (
-				(failedSources.has(source) &&
-					!/(PACKET|FRAME|ACK|CONGESTION|LOSS|WINDOW|MTU)/i.test(name)) ||
-				name === "QUIC_SESSION" ||
-				(/(QUIC|WEB_TRANSPORT|WEBTRANSPORT)/i.test(name) &&
-					!/(CRYPTO_FRAME|PACKET|COALESCED|UNAUTHENTICATED)/i.test(name) &&
-					/(created|error|fail|close|transport_parameter|settings|handshake|version)/i.test(
-						`${name} ${details}`
-					))
-			);
-		})
-		.slice(-120)
-		.map(({ name, params, source }) => `[${source}] ${name} ${JSON.stringify(params ?? {})}`)
-		.join("\n");
-	return `${events}\nClientHello strings: ${clientHelloStrings}`;
 }
 
 async function stopChrome(browser) {
