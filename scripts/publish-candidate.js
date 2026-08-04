@@ -19,7 +19,7 @@ export const publicationOrder = [
 	"@http3-server/win32-arm64",
 	"@http3-server/win32-x64",
 	"@http3-server/native",
-	"http3s",
+	"http3-server",
 ];
 
 export function publicationPlan(manifest, { sourceCommit, version }) {

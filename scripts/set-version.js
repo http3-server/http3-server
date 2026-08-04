@@ -24,7 +24,7 @@ for (const relativePath of packagePaths) {
 	const path = join(projectRoot, relativePath);
 	const pkg = JSON.parse(readFileSync(path, "utf8"));
 	pkg.version = version;
-	if (pkg.name === "http3s") pkg.dependencies["@http3-server/native"] = version;
+	if (pkg.name === "http3-server") pkg.dependencies["@http3-server/native"] = version;
 	if (pkg.name === "@http3-server/native") {
 		for (const name of Object.keys(pkg.optionalDependencies)) {
 			pkg.optionalDependencies[name] = version;

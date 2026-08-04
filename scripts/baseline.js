@@ -26,7 +26,7 @@ run("node", ["scripts/import-binaries.js", join(producerRoot, "src"), "--local",
 run("npm", ["run", "lint"]);
 run("npm", ["test"]);
 run("npm", ["run", "check:workspace"]);
-run("npm", ["run", "test:integration", "--workspace", "http3s"], projectRoot, {
+run("npm", ["run", "test:integration", "--workspace", "http3-server"], projectRoot, {
 	...process.env,
 	AIOQUIC_PYTHON: python,
 });

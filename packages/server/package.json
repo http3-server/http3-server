@@ -1,5 +1,5 @@
 {
-	"name": "http3s",
+	"name": "http3-server",
 	"type": "module",
 	"version": "0.2.0",
 	"description": "HTTP/3 and WebTransport server for Node.js",

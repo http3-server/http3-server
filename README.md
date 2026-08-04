@@ -14,7 +14,7 @@ tool to the published packages. The handoff between the repositories is a checks
 
 | Package | Responsibility |
 | --- | --- |
-| `http3s` | Public HTTP/3 and WebTransport server API |
+| `http3-server` | Public HTTP/3 and WebTransport server API |
 | `@http3-server/dev-certificates` | Portable short-lived development certificates |
 | `@http3-server/native` | Selects and loads the current platform package |
 | `@http3-server/<target>` | Native addon plus MSH3 and MsQuic runtime libraries |
@@ -26,7 +26,7 @@ every development machine. The local native loader uses the matching checked-out
 instead.
 
 The certificate package has no runtime dependencies and uses Web Crypto on Node.js,
-Bun, and Deno. Its Node.js adapter safely caches and rotates PEM files for `http3s`;
+Bun, and Deno. Its Node.js adapter safely caches and rotates PEM files for `http3-server`;
 see [`packages/dev-certificates/README.md`](packages/dev-certificates/README.md).
 
 ## Development
@@ -40,7 +40,7 @@ npm run verify
 
 To try WebTransport from a browser with Vite, run `npm run example:vite` and open
 <http://127.0.0.1:5173>. The tested example generates and caches its own short-lived
-certificate, starts Vite and `http3s` together, and demonstrates datagrams and a reliable
+certificate, starts Vite and `http3-server` together, and demonstrates datagrams and a reliable
 stream without proxying WebTransport through Vite. See
 [`examples/vite-webtransport`](examples/vite-webtransport).
 

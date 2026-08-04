@@ -8,9 +8,9 @@ reused.
 
 ## 0. Registry and repository prerequisites
 
-The npm organization `http3-server` must exist, the release maintainer must use 2FA,
-and the unscoped `http3s` name must still be available. All package manifests pin the
-public npm registry, public access, and provenance generation.
+The npm organization and unscoped package name `http3-server` must exist, and the
+release maintainer must use 2FA. All package manifests pin the public npm registry,
+public access, and provenance generation.
 
 npm does not allow staged or trusted publishing for a package that has never been
 published. Bootstrap the first release with a short-lived granular npm token that can
@@ -81,7 +81,7 @@ artifact, verifies it again, and publishes in dependency order:
 1. `@http3-server/dev-certificates`;
 2. the eight `@http3-server/<target>` packages;
 3. `@http3-server/native`;
-4. `http3s`.
+4. `http3-server`.
 
 After reviewing the candidate artifact, dispatch the workflow with its run ID and exact
 version. The confirmation input deliberately includes the version:
@@ -119,7 +119,7 @@ npm trust github @http3-server/dev-certificates \
 ```
 
 Repeat that command for the eight native target packages, `@http3-server/native`, and
-`http3s`. Then set each package's publishing access to require 2FA and disallow tokens,
+`http3-server`. Then set each package's publishing access to require 2FA and disallow tokens,
 delete the `NPM_TOKEN` GitHub secret, and verify the next `next` release through OIDC.
 Trusted publishing automatically produces provenance for public packages from this
 public repository.

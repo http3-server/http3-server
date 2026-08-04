@@ -3,7 +3,7 @@
 	"type": "module",
 	"version": "0.2.0",
 	"packageManager": "npm@11.18.0",
-	"description": "Release workspace for the http3s HTTP/3 and WebTransport server",
+	"description": "Release workspace for the http3-server HTTP/3 and WebTransport server",
 	"private": true,
 	"workspaces": [
 		"packages/*"

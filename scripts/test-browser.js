@@ -8,7 +8,7 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ensureDevelopmentCertificate } from "@http3-server/dev-certificates/node";
-import { HTTP3Server } from "http3s";
+import { HTTP3Server } from "http3-server";
 
 function deferred() {
 	let resolve;

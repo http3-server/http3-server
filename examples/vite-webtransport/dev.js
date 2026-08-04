@@ -1,13 +1,13 @@
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ensureDevelopmentCertificate } from "@http3-server/dev-certificates/node";
-import { HTTP3Server } from "http3s";
+import { HTTP3Server } from "http3-server";
 import { createServer } from "vite";
 
 const directory = dirname(fileURLToPath(import.meta.url));
 const pageOrigin = "http://127.0.0.1:5173";
 const certificate = await ensureDevelopmentCertificate({
-	directory: join(directory, ".http3s"),
+	directory: join(directory, ".http3-server"),
 });
 const http3 = new HTTP3Server().handle({
 	error(error) {
