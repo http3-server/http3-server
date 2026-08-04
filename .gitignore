@@ -1,4 +1,5 @@
 node_modules/
 .cache/
+release/
 __pycache__/
 *.py[cod]

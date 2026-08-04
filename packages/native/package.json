@@ -21,7 +21,6 @@
 		"http3",
 		"quic",
 		"server",
-		"client",
 		"networking"
 	],
 	"exports": {

@@ -2,7 +2,7 @@
 	"name": "http3.root",
 	"type": "module",
 	"version": "0.1.1",
-	"description": "A collection of HTTP/3 packages",
+	"description": "Release workspace for the http3s HTTP/3 and WebTransport server",
 	"private": true,
 	"workspaces": [
 		"packages/*"

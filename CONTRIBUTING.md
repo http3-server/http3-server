@@ -13,14 +13,18 @@ For local integration work, build `msh3-node` and atomically import only the cur
 platform bundle:
 
 ```sh
-npm run binaries:import:local -- ../msh3-node/src
+npm run binaries:import:local
 ```
+
+This uses a sibling `../msh3-node` checkout by default. Set `MSH3_NODE_ROOT` when the
+producer lives elsewhere.
 
 The release importer still requires all six bundles from one workflow run.
 Each v3 build manifest records the exact `msh3-node` producer commit, and
 `native-baseline.json` pins that revision for the release monorepo. Any producer
-change therefore requires a deliberate baseline update and one new complete
-six-platform import; stale or mixed-revision bundles are rejected.
+source, patch, declaration, or build-tool change that can affect bundles therefore
+requires a deliberate baseline update and one new complete six-platform import;
+stale or mixed-revision bundles are rejected.
 
 ## Working agreement
 

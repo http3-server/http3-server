@@ -3,6 +3,19 @@
 This package wraps MSH3 and MsQuic with a small event-oriented HTTP/3 and
 WebTransport API.
 
+## Installation
+
+```sh
+npm install http3s
+```
+
+`http3s` supports Node.js 22, 24, and 26 on macOS, Linux, and Windows on arm64 and
+x64. The matching native package is selected automatically. Running a server requires
+a TLS certificate and private key, and the listening UDP port must be reachable by
+clients.
+
+## Quick start
+
 ```js
 import { HTTP3Server } from "http3s";
 
@@ -43,7 +56,9 @@ console.log(`Listening on ${server.address}:${server.port}`);
 
 `start()` resolves after the native listener is ready and `address` and `port` contain
 its read-only bound endpoint. This makes `port: 0` suitable for tests and parallel local
-servers. Both values return to `undefined` after `stop()` resolves.
+servers. WebTransport is enabled by default; pass `webTransport: false` when only
+ordinary HTTP/3 is needed. Both endpoint values return to `undefined` after `stop()`
+resolves.
 
 `stop({ gracePeriodMs: 10_000 })` closes the listener, lets already accepted
 requests and WebTransport work finish, and rejects new requests on existing
@@ -53,6 +68,10 @@ connections with 503. Remaining work is aborted when the deadline expires. Pass
 The `session` handler may return `false` to reject with 403, or a `Response`
 to choose the successful or error status and response headers. Otherwise the
 server accepts the extended CONNECT request with status 200.
+
+`session.sendDatagram()` and `WebTransportStream#send()` return `true` when the
+bounded native send queue accepts the message and `false` when it does not. Rejections
+are also reported to the optional `error` handler.
 
 ## Request API and WebTransport API
 
@@ -71,6 +90,23 @@ server.handle({
 	},
 });
 ```
+
+For frame-level control, send on the same request object instead of returning a
+`Response`:
+
+```js
+server.handle({
+	async stream(request) {
+		await request.sendHeaders({ ":status": "200", "content-type": "text/plain" });
+		await request.sendData(new TextEncoder().encode("hello"), request.fin);
+	},
+});
+```
+
+`sendHeaders()` settles one `Promise<boolean>` and `sendData()` settles one result per
+argument. The server-level `sendHeadersFrame()` and `sendDataFrame()` methods expose
+the same operations by stream ID. Most applications should prefer returning a
+`Response`, which handles ordering, streaming, backpressure, and FIN automatically.
 
 WebTransport starts as an extended CONNECT request but becomes a long-lived
 `WebTransportSession`. The `session` handler decides whether to accept it; `datagram`

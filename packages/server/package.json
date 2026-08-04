@@ -22,7 +22,6 @@
 		"quic",
 		"webtransport",
 		"server",
-		"client",
 		"networking"
 	],
 	"types": "./types.d.ts",

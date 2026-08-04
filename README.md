@@ -28,7 +28,7 @@ native loader uses the matching checked-out binary instead.
 Clone with Git LFS available, then run:
 
 ```sh
-npm install
+npm ci
 npm run verify
 ```
 
@@ -38,13 +38,14 @@ native producer, import its current-platform bundle and run the cross-repository
 baseline:
 
 ```sh
-npm run binaries:import:local -- ../msh3-node/src
+npm run binaries:import:local
 npm run baseline
 npm run browser
 ```
 
-The baseline adds a real HTTP/3 request and WebTransport session using the pinned
-integration client.
+The importer uses a sibling `../msh3-node` checkout by default; set `MSH3_NODE_ROOT`
+when the producer lives elsewhere. The baseline adds a real HTTP/3 request and
+WebTransport session using the pinned integration client.
 
 Use `npm run pack:check:protocol` and `npm run pack:check:browser` to install and
 exercise the exact local tarballs, `npm run stress` for repeated native concurrency

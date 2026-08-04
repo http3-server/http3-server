@@ -39,12 +39,22 @@ npm run candidate:test:protocol
 npm run candidate:test:browser
 ```
 
-Review the changelog or release notes for user-visible API changes, protocol support,
-and known limitations. `release/candidate-manifest.json` records package identities,
-dependency edges, tarball integrity, native checksums, and the security-policy checksum.
-The release-candidate workflow performs the same checks and uploads npm tarballs without
-publishing them. It requires the repository secret `MSH3_ARTIFACT_TOKEN` with read access
-to the private producer workflow artifact and a successful producer run ID.
+Review the release notes for user-visible API changes, protocol support, and known
+limitations. Commit and push the version, lockfile, binary manifests, and
+imported binaries, then dispatch the candidate workflow with the same producer run:
+
+```sh
+gh workflow run release-candidate.yml \
+  --repo http3-server/http3-server \
+  -f producer_run_id=1234567890
+```
+
+The workflow imports that exact producer artifact into a clean checkout, repeats the
+release checks across the supported matrix, and uploads `npm-release-candidate` without
+publishing it. It requires the repository secret `MSH3_ARTIFACT_TOKEN` with read access
+to the private producer workflow artifact. `release/candidate-manifest.json` records
+package identities, dependency edges, tarball integrity, native checksums, and the
+security-policy checksum.
 
 ## 4. Publish in dependency order
 
