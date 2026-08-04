@@ -14,6 +14,7 @@ if (!version || !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$
 
 const packagePaths = [
 	"package.json",
+	"packages/dev-certificates/package.json",
 	"packages/native/package.json",
 	"packages/server/package.json",
 	...platforms.map(({ id }) => `binaries/${id}/package.json`),

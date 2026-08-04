@@ -1,5 +1,7 @@
 node_modules/
 .cache/
+.http3s/
+dist/
 release/
 __pycache__/
 *.py[cod]

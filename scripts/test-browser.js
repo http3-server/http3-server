@@ -2,12 +2,12 @@
 // @ts-check
 
 import assert from "node:assert/strict";
-import { execFileSync, spawn } from "node:child_process";
-import { createHash, X509Certificate } from "node:crypto";
+import { spawn } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { ensureDevelopmentCertificate } from "@http3-server/dev-certificates/node";
 import { HTTP3Server } from "http3s";
 
 function deferred() {
@@ -47,44 +47,6 @@ function chromePath() {
 	const path = candidates.find((candidate) => candidate && existsSync(candidate));
 	if (!path) throw new Error("Set CHROME_PATH to a Chrome or Chromium executable");
 	return path;
-}
-
-function createCertificate(directory) {
-	const certificateFile = join(directory, "localhost.pem");
-	const privateKeyFile = join(directory, "localhost-key.pem");
-	execFileSync(
-		"openssl",
-		[
-			"req",
-			"-x509",
-			"-newkey",
-			"ec",
-			"-pkeyopt",
-			"ec_paramgen_curve:P-256",
-			"-sha256",
-			"-nodes",
-			"-days",
-			"10",
-			"-subj",
-			"/CN=localhost",
-			"-addext",
-			"subjectAltName=DNS:localhost,IP:127.0.0.1",
-			"-addext",
-			"basicConstraints=critical,CA:FALSE",
-			"-addext",
-			"keyUsage=critical,digitalSignature",
-			"-addext",
-			"extendedKeyUsage=serverAuth",
-			"-keyout",
-			privateKeyFile,
-			"-out",
-			certificateFile,
-		],
-		{ stdio: "ignore" }
-	);
-	const certificate = new X509Certificate(readFileSync(certificateFile));
-	const hash = [...createHash("sha256").update(certificate.raw).digest()];
-	return { certificateFile, hash, privateKeyFile };
 }
 
 async function listen(server) {
@@ -263,7 +225,9 @@ let chromeStderr = () => "";
 let devTools;
 
 try {
-	const { certificateFile, hash, privateKeyFile } = createCertificate(temporaryDirectory);
+	const { certificateFile, certificateHash, privateKeyFile } = await ensureDevelopmentCertificate(
+		{ directory: join(temporaryDirectory, "certificate") }
+	);
 	const receivedDatagram = deferred();
 	const receivedAbort = deferred();
 	const receivedAbortData = deferred();
@@ -324,7 +288,7 @@ try {
 
 	const expression = `(async () => {
 		if (!isSecureContext) throw new Error("browser test page is not a secure context");
-		const options = { serverCertificateHashes: [{ algorithm: "sha-256", value: new Uint8Array(${JSON.stringify(hash)}) }] };
+		const options = { serverCertificateHashes: [{ algorithm: "sha-256", value: new Uint8Array(${JSON.stringify([...certificateHash])}) }] };
 		const connect = async (path) => {
 			const transport = new WebTransport("https://127.0.0.1:${server.port}" + path, options);
 			await transport.ready;

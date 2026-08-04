@@ -34,7 +34,7 @@ stale or mixed-revision bundles are rejected.
 4. Treat `npm run check:release:strict` as the binary-provenance gate. It is expected to
    fail until all six platform bundles from one native build have been imported.
 5. Keep package versions in lockstep. Use `npm run version:set -- <version>` rather than
-   editing eight manifests independently.
+   editing nine manifests independently.
 
 Native changes should land in the builder first. The npm monorepo change should record
 the successful native workflow run used for the import in its pull request description.

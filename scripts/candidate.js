@@ -30,7 +30,12 @@ export function readCandidate(candidateDirectory) {
 export function installCandidate(candidateDirectory) {
 	const candidate = readCandidate(candidateDirectory);
 	const platformName = `@http3-server/${process.platform}-${process.arch}`;
-	const required = ["http3s", "@http3-server/native", platformName];
+	const required = [
+		"http3s",
+		"@http3-server/dev-certificates",
+		"@http3-server/native",
+		platformName,
+	];
 	for (const name of required) {
 		if (!candidate.packageByName.has(name))
 			throw new Error(`Candidate does not contain ${name}`);

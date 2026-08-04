@@ -1,0 +1,52 @@
+{
+	"name": "@http3-server/dev-certificates",
+	"type": "module",
+	"version": "0.1.1",
+	"description": "Zero-dependency development certificates for WebTransport and local TLS",
+	"license": "MIT-0",
+	"author": "Jonathan Neal",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/http3-server/http3-server.git",
+		"directory": "packages/dev-certificates"
+	},
+	"homepage": "https://github.com/http3-server/http3-server/tree/main/packages/dev-certificates",
+	"bugs": {
+		"url": "https://github.com/http3-server/http3-server/issues"
+	},
+	"keywords": [
+		"certificate",
+		"development",
+		"http3",
+		"tls",
+		"webtransport"
+	],
+	"engines": {
+		"bun": ">=1.3.14",
+		"deno": ">=2.9.4",
+		"node": ">=22"
+	},
+	"types": "./types.d.ts",
+	"exports": {
+		".": {
+			"types": "./types.d.ts",
+			"default": "./index.js"
+		},
+		"./node": {
+			"types": "./node.d.ts",
+			"default": "./node.js"
+		}
+	},
+	"scripts": {
+		"test": "node --test test/*.test.js && npm run test:types",
+		"test:types": "tsc -p ../../tsconfig.json"
+	},
+	"files": [
+		"index.js",
+		"LICENSE.md",
+		"node.d.ts",
+		"node.js",
+		"README.md",
+		"types.d.ts"
+	]
+}

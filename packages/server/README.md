@@ -14,6 +14,11 @@ x64. The matching native package is selected automatically. Running a server req
 a TLS certificate and private key, and the listening UDP port must be reachable by
 clients.
 
+For local development, `@http3-server/dev-certificates` creates the short-lived P-256
+certificate and browser hash required by WebTransport without OpenSSL or trust-store
+changes. A complete Vite example is available in the
+[`http3-server` repository](https://github.com/http3-server/http3-server/tree/main/examples/vite-webtransport).
+
 ## Quick start
 
 ```js

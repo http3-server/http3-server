@@ -16,7 +16,7 @@ function sha256(path) {
 const manifestPath = join(candidateDirectory, "candidate-manifest.json");
 const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 if (manifest.formatVersion !== 1) throw new Error("Unsupported candidate manifest format");
-const expectedPackages = manifest.scope === "local" ? 3 : 8;
+const expectedPackages = manifest.scope === "local" ? 4 : 9;
 if (manifest.scope !== "local" && manifest.scope !== "release") {
 	throw new Error("Candidate manifest has an unsupported scope");
 }
@@ -36,7 +36,7 @@ for (const pkg of manifest.packages) {
 	if (statSync(path).size !== pkg.bytes || sha256(path) !== pkg.sha256) {
 		throw new Error(`${pkg.filename} differs from candidate-manifest.json`);
 	}
-	if (pkg.name.startsWith("@http3-server/") && pkg.name !== "@http3-server/native") {
+	if (pkg.os && pkg.cpu) {
 		if (
 			!pkg.buildManifest ||
 			pkg.buildManifest.formatVersion !== 3 ||
@@ -61,12 +61,17 @@ if (producerCommits.size !== 1) {
 }
 
 const nativePackage = manifest.packages.find(({ name }) => name === "@http3-server/native");
+const devCertificatesPackage = manifest.packages.find(
+	({ name }) => name === "@http3-server/dev-certificates"
+);
 const serverPackage = manifest.packages.find(({ name }) => name === "http3s");
+if (!devCertificatesPackage) throw new Error("Candidate does not contain development certificates");
 if (serverPackage.dependencies?.["@http3-server/native"] !== manifest.releaseVersion) {
 	throw new Error("http3s has the wrong native dependency edge");
 }
 for (const name of names) {
-	if (name === "http3s" || name === "@http3-server/native") continue;
+	const pkg = manifest.packages.find((candidatePackage) => candidatePackage.name === name);
+	if (!pkg?.os || !pkg.cpu) continue;
 	if (nativePackage.optionalDependencies?.[name] !== manifest.releaseVersion) {
 		throw new Error(`@http3-server/native has the wrong ${name} dependency edge`);
 	}

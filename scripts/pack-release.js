@@ -46,6 +46,7 @@ if (selectedPlatforms.length === 0) {
 }
 const packageDirectories = [
 	...selectedPlatforms.map(({ id }) => `binaries/${id}`),
+	"packages/dev-certificates",
 	"packages/native",
 	"packages/server",
 ];

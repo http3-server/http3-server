@@ -14,10 +14,12 @@ try {
 	writeFileSync(
 		join(root, "smoke.mjs"),
 		`import { HTTP3Server as NativeHTTP3Server } from "@http3-server/native";\n` +
+			`import { ensureDevelopmentCertificate } from "@http3-server/dev-certificates/node";\n` +
 			`import { HTTP3Server } from "http3s";\n` +
 			`if (typeof NativeHTTP3Server !== "function" || typeof HTTP3Server !== "function") throw new Error("candidate exports are unavailable");\n` +
+			`const certificate = await ensureDevelopmentCertificate({ directory: ${JSON.stringify(join(root, ".http3s"))} });\n` +
 			`const server = new HTTP3Server().handle({ stream: () => new Response("ok") });\n` +
-			`await server.start({ port: 0, certificateFile: ${JSON.stringify(join(projectRoot, "packages/server/test/localhost.pem"))}, privateKeyFile: ${JSON.stringify(join(projectRoot, "packages/server/test/localhost-key.pem"))} });\n` +
+			`await server.start({ port: 0, certificateFile: certificate.certificateFile, privateKeyFile: certificate.privateKeyFile });\n` +
 			`if (!server.port || !server.address) throw new Error("candidate listener did not report its endpoint");\n` +
 			`await server.stop({ gracePeriodMs: 0 });\n`
 	);
@@ -25,7 +27,11 @@ try {
 
 	writeFileSync(
 		join(root, "types.test.ts"),
-		`import { HTTP3Server } from "http3s";\n` +
+		`import { createDevelopmentCertificate } from "@http3-server/dev-certificates";\n` +
+			`import { HTTP3Server } from "http3s";\n` +
+			`const certificate = await createDevelopmentCertificate();\n` +
+			`const hash: Uint8Array = certificate.certificateHash;\n` +
+			`void hash;\n` +
 			`const server = new HTTP3Server().handle({ stream: () => new Response("ok"), session: () => false });\n` +
 			`const started: Promise<void> = server.start({ certificateFile: "certificate.pem", privateKeyFile: "private-key.pem" });\n` +
 			`void started;\n`

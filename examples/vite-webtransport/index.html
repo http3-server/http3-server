@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Vite + WebTransport</title>
+		<script type="module" src="/src.js"></script>
+		<link rel="stylesheet" href="/style.css" />
+	</head>
+	<body>
+		<main>
+			<p class="eyebrow">http3s development example</p>
+			<h1>Vite + WebTransport</h1>
+			<p>
+				Vite serves this page. The browser connects directly to a separate HTTP/3 server over
+				WebTransport.
+			</p>
+
+			<section class="connection">
+				<span id="status" data-state="idle">Not connected</span>
+				<button id="connect" type="button">Connect</button>
+			</section>
+
+			<form id="datagram">
+				<label for="datagram-message">Disposable datagram</label>
+				<div>
+					<input id="datagram-message" name="message" value="player input" autocomplete="off" />
+					<button type="submit" disabled>Send</button>
+				</div>
+			</form>
+
+			<form id="stream">
+				<label for="stream-message">Reliable stream</label>
+				<div>
+					<input
+						id="stream-message"
+						name="message"
+						value="important game event"
+						autocomplete="off"
+					/>
+					<button type="submit" disabled>Send</button>
+				</div>
+			</form>
+
+			<pre id="log" aria-live="polite"></pre>
+		</main>
+	</body>
+</html>

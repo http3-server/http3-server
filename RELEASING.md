@@ -1,6 +1,6 @@
 # Releasing
 
-All eight published packages use one version. A release is promoted from a single
+All nine published packages use one version. A release is promoted from a single
 successful `msh3-node` build, never assembled from runs or local machines.
 
 ## 1. Produce native bundles
@@ -60,9 +60,10 @@ security-policy checksum.
 
 After reviewing the tarballs, publish:
 
-1. the six `@http3-server/<platform>-<arch>` packages;
-2. `@http3-server/native`;
-3. `http3s`.
+1. `@http3-server/dev-certificates`;
+2. the six `@http3-server/<platform>-<arch>` packages;
+3. `@http3-server/native`;
+4. `http3s`.
 
 Use the same npm dist-tag for every package. For experimental releases, prefer `next`.
 Move to `latest` only after the candidate passes the six-platform Node 22/24/26 load

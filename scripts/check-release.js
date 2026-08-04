@@ -21,6 +21,9 @@ function sha256(path) {
 }
 
 const nativePackage = readJson(join(projectRoot, "packages/native/package.json"));
+const devCertificatesPackage = readJson(
+	join(projectRoot, "packages/dev-certificates/package.json")
+);
 const serverPackage = readJson(join(projectRoot, "packages/server/package.json"));
 const releaseVersion = serverPackage.version;
 const failures = [];
@@ -29,6 +32,9 @@ if (readJson(join(projectRoot, "package.json")).version !== releaseVersion) {
 	failures.push("root and published package versions differ");
 }
 if (nativePackage.version !== releaseVersion) failures.push("native and server versions differ");
+if (devCertificatesPackage.version !== releaseVersion) {
+	failures.push("development certificates and server versions differ");
+}
 if (serverPackage.dependencies["@http3-server/native"] !== releaseVersion) {
 	failures.push("http3s does not depend on the release version of @http3-server/native");
 }

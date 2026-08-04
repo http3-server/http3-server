@@ -23,6 +23,7 @@
 		"candidate:test:browser": "node scripts/verify-candidate.js release && node scripts/test-candidate-browser.js release",
 		"candidate:test:protocol": "node scripts/verify-candidate.js release && node scripts/test-candidate-protocol.js release",
 		"check:workspace": "node scripts/check-release.js --workspace",
+		"example:vite": "node examples/vite-webtransport/dev.js",
 		"lint": "biome check",
 		"lint:fix": "biome check --write",
 		"integration": "node scripts/run-integration.js",
@@ -33,11 +34,13 @@
 		"soak": "node --expose-gc scripts/run-soak.js",
 		"stress": "node scripts/run-stress.js",
 		"test": "node --test scripts/*.test.js && npm test --workspaces --if-present",
+		"test:portable": "node scripts/test-dev-certificates-runtime.js && bun scripts/test-dev-certificates-runtime.js && deno run scripts/test-dev-certificates-runtime.js",
 		"version:set": "node scripts/set-version.js",
 		"verify": "npm run lint && npm test && npm run check:workspace"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.13",
-		"typescript": "7.0.2"
+		"typescript": "7.0.2",
+		"vite": "8.1.5"
 	}
 }
