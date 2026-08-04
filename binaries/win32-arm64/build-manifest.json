@@ -1,7 +1,7 @@
 {
 	"formatVersion": 3,
 	"producer": "msh3-node",
-	"producerCommit": "ffe42c21e69b24a818bb94f2938d4305eca3290e",
+	"producerCommit": "0112364c447f5ac1b6867b6f8ceba88e72526e68",
 	"platform": "win32-arm64",
 	"msh3Commit": "92f23c72b50b0714d7cd39850e7b97e8ed1129e1",
 	"msquicCommit": "87b53085d76bd7920d490a6f226c9999b6614d14",
@@ -12,19 +12,19 @@
 		{
 			"name": "http3.node",
 			"bytes": 474112,
-			"sha256": "4bec83278de8394f0f9b2cdbdee8dfd48aa914f3df130a2ead9c240af25a54ee",
+			"sha256": "596ddd9f0ad0ff6fdb0e3ebc2b28f271d54c30632f3d0f3a7a00c5bf67b290f0",
 			"architecture": "arm64"
 		},
 		{
 			"name": "msh3.dll",
 			"bytes": 926208,
-			"sha256": "920142fb7c5865b16ba84fbb4e889ffbed107f14e0a22cfa4cf4b2c5e54e19d4",
+			"sha256": "44dd76265d3525cc58f807c7c6118a71660d717d9d8ce32e5487ca892a7bca95",
 			"architecture": "arm64"
 		},
 		{
 			"name": "msquic.dll",
 			"bytes": 2956288,
-			"sha256": "4af46e20c373610323a3b3eaa5e6b475f968759bf50acb25826ca3b8a7b4f389",
+			"sha256": "b2c4148a767ca082c348d9c7946595ba4fbe08bbaa010216dcf7af3a87dade55",
 			"architecture": "arm64"
 		}
 	]

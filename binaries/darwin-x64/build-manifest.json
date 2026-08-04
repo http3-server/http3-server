@@ -1,7 +1,7 @@
 {
 	"formatVersion": 3,
 	"producer": "msh3-node",
-	"producerCommit": "ffe42c21e69b24a818bb94f2938d4305eca3290e",
+	"producerCommit": "0112364c447f5ac1b6867b6f8ceba88e72526e68",
 	"platform": "darwin-x64",
 	"msh3Commit": "92f23c72b50b0714d7cd39850e7b97e8ed1129e1",
 	"msquicCommit": "87b53085d76bd7920d490a6f226c9999b6614d14",
@@ -12,7 +12,7 @@
 		{
 			"name": "http3.node",
 			"bytes": 233648,
-			"sha256": "d2d8ba9d7cb5ce33b11da0d626f336e703ecb88436e8371aacba4149caf21e70",
+			"sha256": "5f2432bf10588036543e7579623465c4d06fcda98f0f9cb332e9b35bca3af883",
 			"architecture": "x64"
 		},
 		{

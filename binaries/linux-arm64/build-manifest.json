@@ -1,7 +1,7 @@
 {
 	"formatVersion": 3,
 	"producer": "msh3-node",
-	"producerCommit": "ffe42c21e69b24a818bb94f2938d4305eca3290e",
+	"producerCommit": "0112364c447f5ac1b6867b6f8ceba88e72526e68",
 	"platform": "linux-arm64",
 	"msh3Commit": "92f23c72b50b0714d7cd39850e7b97e8ed1129e1",
 	"msquicCommit": "87b53085d76bd7920d490a6f226c9999b6614d14",
