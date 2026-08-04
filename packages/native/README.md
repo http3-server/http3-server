@@ -21,7 +21,8 @@ for the complete promotion and verification process.
 
 ## Support
 
-`@http3-server/native` supports Node.js 22, 24, and 26. Report issues in the
+`@http3-server/native` supports Node.js 22, 24, and 26. Bun and Deno runtime support is
+not yet tested or claimed. Report issues in the
 [`http3-server` repository](https://github.com/http3-server/http3-server/issues).
 
 ## License

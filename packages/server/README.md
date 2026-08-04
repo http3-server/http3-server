@@ -14,6 +14,10 @@ x64. The matching native package is selected automatically. Running a server req
 a TLS certificate and private key, and the listening UDP port must be reachable by
 clients.
 
+Runtime support is currently Node.js only. Bun and Deno can load many Node-API addons,
+but `http3s` is not yet part of their tested support matrix. The separate
+`@http3-server/dev-certificates` package is tested on Node.js, Bun, and Deno.
+
 For local development, `@http3-server/dev-certificates` creates the short-lived P-256
 certificate and browser hash required by WebTransport without OpenSSL or trust-store
 changes. A complete Vite example is available in the
