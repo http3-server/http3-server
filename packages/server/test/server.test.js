@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { HTTP3Server } from "../HTTP3Server.js";
-import { mapOf } from "../mapOf.js";
+import { mapOf } from "../internal/mapOf.js";
 
 test("typed maps preserve standard Map#get semantics", () => {
 	const Items = mapOf("Item");

@@ -1,5 +1,5 @@
 // @ts-check
-/// <reference types="./types.d.ts" />
+/// <reference types="../types.d.ts" />
 
 /** @type {<T>(type: string) => http3.MapConstructor<T>} */
 export const mapOf = (

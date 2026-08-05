@@ -1,7 +1,7 @@
 {
 	"formatVersion": 4,
 	"producer": "msh3-node",
-	"producerCommit": "07dcc8f6f51a173b2c4c423f220375a713be4a03",
+	"producerCommit": "9400b8d969200def51a80e7425f1a0814036680b",
 	"platform": "darwin-arm64",
 	"target": {
 		"os": "darwin",
@@ -12,20 +12,20 @@
 	},
 	"msh3Commit": "92f23c72b50b0714d7cd39850e7b97e8ed1129e1",
 	"msquicCommit": "87b53085d76bd7920d490a6f226c9999b6614d14",
-	"msh3PatchSha256": "d6cede70757935a065697ec89cdae6a2fc55c1f60f9a9ed2390843124c26bc58",
+	"msh3PatchSha256": "805526273a119c9eb983af21b69611bdfdc0f32cd906063bd60e4b9109d04373",
 	"msquicPatchSha256": "cd48a4161c710b368f4b683ed739cab95f673606fa69e79290e382ca6893d66c",
 	"declarationSha256": "5140cc4ae656a0da057db95ea69d2f2e50e33bb22e962f77087e692ba3ecc77a",
 	"files": [
 		{
 			"name": "http3.node",
 			"bytes": 247824,
-			"sha256": "3dd371cdc62d301be64d51b63079bde029ddf838af55ad6b6a1cffd86a7ecee4",
+			"sha256": "40fcbc79a39f2d68de20cc55030216ce28bc1c56ae6751491fa697cfed0da157",
 			"architecture": "arm64"
 		},
 		{
 			"name": "libmsh3.dylib",
 			"bytes": 4202992,
-			"sha256": "b868e33eac404ed1b92e27832481261932d09eae31abd58a96eae7e245e26e77",
+			"sha256": "8a318d877ebee466878969e87907d5008dfca73edc9acdad3286f08e121d2e3f",
 			"architecture": "arm64"
 		},
 		{

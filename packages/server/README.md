@@ -1,7 +1,7 @@
-# HTTP/3 and WebTransport Server for Node.js
+# HTTP/3, WebTransport, and WebSocket Server for Node.js
 
-This package wraps MSH3 and MsQuic with a small event-oriented HTTP/3 and
-WebTransport API.
+This package wraps MSH3 and MsQuic with a small event-oriented HTTP/3,
+WebTransport, and WebSocket API, plus HTTP/2 and HTTP/1.1 fallback.
 
 ## Installation
 
@@ -66,8 +66,8 @@ console.log(`Listening on ${server.address}:${server.port}`);
 `start()` resolves after the native listener is ready and `address` and `port` contain
 its read-only bound endpoint. This makes `port: 0` suitable for tests and parallel local
 servers. WebTransport is enabled by default; pass `webTransport: false` when only
-ordinary HTTP/3 is needed. Both endpoint values return to `undefined` after `stop()`
-resolves.
+ordinary HTTP/3 and WebSockets are needed. Extended CONNECT remains advertised for
+HTTP/3 WebSockets. Both endpoint values return to `undefined` after `stop()` resolves.
 
 `stop({ gracePeriodMs: 10_000 })` closes the listener, lets already accepted
 requests and WebTransport work finish, and rejects new requests on existing
@@ -130,6 +130,90 @@ bidirectional stream traffic, rejection, abort, close, and reconnect are verifie
 the pinned Chrome interoperability test. Server-created streams and unidirectional
 streams are not implemented yet.
 
+## WebSockets with HTTP/3-first fallback
+
+WebSockets use the same `.handle()` callbacks over all supported HTTP versions.
+HTTP/3 follows [RFC 9220](https://www.rfc-editor.org/rfc/rfc9220) Extended CONNECT,
+HTTP/2 follows [RFC 8441](https://www.rfc-editor.org/rfc/rfc8441) Extended CONNECT,
+and HTTP/1.1 uses the original Upgrade handshake. In every case, WebSocket frames run
+over one reliable ordered stream; HTTP/3 replaces TCP with QUIC but does not turn a
+WebSocket into unordered UDP datagrams.
+
+```js
+import { HTTPServer } from "@http3-server/server";
+
+const server = new HTTPServer().handle({
+	webSocket(socket) {
+		if (socket.path !== "/events") return false;
+		// Returning an offered name selects the WebSocket subprotocol.
+		return socket.offeredProtocols.includes("events.v1") ? "events.v1" : undefined;
+	},
+	async webSocketMessage(socket, data) {
+		await socket.send(data);
+	},
+	webSocketClose(socket, code, reason) {
+		console.log(socket.httpVersion, code, reason);
+	},
+});
+```
+
+The initial `webSocket` routing callback must return synchronously because its result
+controls the protocol handshake. Return `false` to reject, a string to select one of
+`socket.offeredProtocols`, or any other value to accept without a subprotocol.
+`webSocketMessage` and `webSocketClose` may be asynchronous. Text messages arrive as
+strings, binary messages as `Uint8Array`, and `send()` accepts either. Use `close()` for
+an orderly closing handshake.
+
+`HTTP3Server` exposes these callbacks for an HTTP/3-only listener. `HTTPServer` adds the
+fallback listeners described below. Browser selection still depends on client support:
+the server advertises HTTP/3 through `Alt-Svc` and Extended CONNECT settings, prefers
+standards-compliant HTTP/3 when the client chooses it, then accepts the same handler over
+HTTP/2 or HTTP/1.1 when the client falls back.
+
+## HTTP/2 and HTTP/1.1 fallback
+
+`HTTPServer` composes the HTTP/3 listener with Node.js HTTP/2 and HTTP/1.1 over TCP on
+the same numeric port. One `.handle()` object serves every protocol: `stream` receives a
+Fetch-compatible request for ordinary HTTP traffic, WebSocket handlers span HTTP/3,
+HTTP/2, and HTTP/1.1, while WebTransport handlers are invoked only by HTTP/3.
+
+```js
+import { HTTPServer } from "@http3-server/server";
+
+const server = new HTTPServer().handle({
+	stream(request) {
+		return new Response(`served over ${request.protocol}`);
+	},
+	session(session) {
+		if (session.path !== "/game") return false;
+	},
+});
+
+await server.start({
+	address: "127.0.0.1",
+	port: 4433,
+	certificateFile: "certificate.pem",
+	privateKeyFile: "private-key.pem",
+});
+```
+
+TCP responses advertise the UDP listener with `Alt-Svc`, allowing browsers to move
+eligible requests from HTTP/2 or HTTP/1.1 to HTTP/3. `allowHTTP1` defaults to `true` and
+`altSvcMaxAge` defaults to 3,600 seconds. HTTP/2 Extended CONNECT is enabled by default;
+pass `enableHTTP2ConnectProtocol: false` when an attached integration only handles
+HTTP/1.1 WebSocket Upgrade, as Vite HMR does. This setting does not disable HTTP/3
+Extended CONNECT. `server.http3` exposes the underlying
+`HTTP3Server`, and `server.tcpServer` exposes the Node.js secure server for lower-level
+integrations. When no shared `webSocket` handler is installed, an additional HTTP/1.1
+`upgrade` listener on `tcpServer` may own the socket instead, which keeps integrations
+such as Vite HMR working.
+
+The portable part of the shared stream contract is `Request` to `Response`. On HTTP/3,
+the request remains the richer `Stream` with frame-level methods; callers must narrow on
+`request.protocol === "HTTP/3"` before using those methods. The `connection` callback is
+also HTTP/3-specific. WebSockets have their own shared callbacks because neither an
+accepted Extended CONNECT stream nor an HTTP/1.1 Upgrade is a normal Fetch response.
+
 ## Resource limits
 
 Peer-controlled work is bounded and configurable:
@@ -149,6 +233,8 @@ Peer-controlled work is bounded and configurable:
 | `receiveWindowBytes` | 1 MiB/stream | QUIC flow control pauses the peer |
 | `connectionReceiveWindowBytes` | 16 MiB/connection | QUIC flow control pauses the peer |
 | `maxIncompleteBodyMs` | 30 seconds | stalled application delivery aborts receive |
+| `maxWebSocketMessageBytes` | 16 MiB/message | oversized frames or reassembled messages close with 1009 |
+| `webSocketCloseTimeoutMs` | 5 seconds | an unanswered close handshake aborts the transport |
 
 One inbound chunk may be pending per request or reliable WebTransport stream.
 The QUIC receive windows default to 1 MiB per stream and 16 MiB per connection;

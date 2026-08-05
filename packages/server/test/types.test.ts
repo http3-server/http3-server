@@ -4,7 +4,10 @@ import {
 	fin,
 	HTTP3Server,
 	type HTTP3ServerError,
+	HTTPServer,
+	type HTTPServerError,
 	type Stream,
+	type WebSocketConnection,
 	type WebTransportSession,
 	type WebTransportStream,
 } from "@http3-server/server";
@@ -31,6 +34,14 @@ const server = new HTTP3Server().handle({
 	webTransportStream(stream: WebTransportStream) {
 		stream.send(new Uint8Array([1]));
 	},
+	webSocket(socket: WebSocketConnection) {
+		return socket.offeredProtocols.includes("echo") ? "echo" : false;
+	},
+	async webSocketMessage(socket, data) {
+		const protocol: "HTTP/1.1" | "HTTP/2" | "HTTP/3" = socket.httpVersion;
+		void protocol;
+		await socket.send(data);
+	},
 });
 
 const started: Promise<void> = server.start({
@@ -55,3 +66,31 @@ native.handleRequest((_id, _connectionId, headers) => {
 	void value;
 });
 void native.sendHeaders("1", 200, [["content-type", "text/plain"]], true);
+
+const fallback = new HTTPServer().handle({
+	error(error: HTTPServerError | HTTP3ServerError) {
+		const code: string = error.code;
+		void code;
+	},
+	stream(request) {
+		const protocol: "HTTP/1.1" | "HTTP/2" | "HTTP/3" = request.protocol;
+		void protocol;
+		return new Response(request.url);
+	},
+	session(session) {
+		return session.path === "/game" ? undefined : false;
+	},
+	webSocket(socket) {
+		return socket.path === "/socket";
+	},
+});
+void fallback.start({
+	address: "127.0.0.1",
+	port: 0,
+	certificateFile: "certificate.pem",
+	privateKeyFile: "private-key.pem",
+	altSvcMaxAge: 3600,
+	enableHTTP2ConnectProtocol: false,
+	maxWebSocketMessageBytes: 1024 * 1024,
+	webSocketCloseTimeoutMs: 1000,
+});

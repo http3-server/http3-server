@@ -3,8 +3,10 @@
 
 import { HTTP3Server as HTTP3NativeServer } from "@http3-server/native";
 import { Connection } from "./Connection.js";
-import { mapOf } from "./mapOf.js";
+import { mapOf } from "./internal/mapOf.js";
+import { sendHeadersBestEffort } from "./internal/send-headers-best-effort.js";
 import { fin, Stream } from "./Stream.js";
+import { WebSocketConnection, webSocketMetadata } from "./WebSocketConnection.js";
 import { WebTransportSession } from "./WebTransportSession.js";
 import { WebTransportStream } from "./WebTransportStream.js";
 
@@ -49,6 +51,8 @@ export class HTTP3Server {
 			this.#streams.clear();
 			this.#sessions.clear();
 			this.#webTransportStreams.clear();
+			for (const { socket } of this.#webSockets.values()) void socket.receiveEnd("aborted");
+			this.#webSockets.clear();
 			this.#cancelAllResponses(new Error("HTTP/3 server stopped"));
 			for (const timer of this.#receiveTimers.values()) clearTimeout(timer);
 			this.#receiveTimers.clear();
@@ -87,14 +91,25 @@ export class HTTP3Server {
 				}
 			}
 			this.#cancelResponsesForConnection(id, new Error("HTTP/3 connection closed"));
+			for (const { socket, connectionId } of this.#webSockets.values()) {
+				if (connectionId === id) void socket.receiveEnd("aborted");
+			}
 			this.#connections.delete(id);
 		});
 
 		this.#native.handleRequest((id, connectionId, headers) => {
 			const connection = this.#connections.get(connectionId);
 			if (!connection) return;
-			if (connection.streams.has(id)) {
+			if (connection.streams.has(id) || this.#webSockets.has(id)) {
 				this.#reportHandlerFailure("request", id, new Error(`Stream ${id} already exists`));
+				return;
+			}
+			if (headers[":method"] === "CONNECT" && headers[":protocol"] === "websocket") {
+				void this.#handleWebSocketStart(id, connectionId, headers);
+				return;
+			}
+			if (headers[":method"] === "CONNECT" && headers[":protocol"] !== undefined) {
+				void sendHeadersBestEffort(this.#native, id, 501);
 				return;
 			}
 
@@ -104,13 +119,18 @@ export class HTTP3Server {
 				this.#streams.set(id, stream);
 				void this.#handleRequest(stream);
 			} catch (cause) {
-				void this.#native.sendHeaders(id, 400, [], true);
 				this.#reportHandlerFailure("request", id, cause);
+				void sendHeadersBestEffort(this.#native, id, 400);
 			}
 		});
 
 		this.#native.handleRequestEnd((id, reason, errorCode) => {
 			this.#clearReceiveTimer(id);
+			const webSocket = this.#webSockets.get(id)?.socket;
+			if (webSocket) {
+				void webSocket.receiveEnd(reason);
+				return;
+			}
 			const session = this.#sessions.get(id);
 			if (session) {
 				if (reason === "aborted")
@@ -131,6 +151,16 @@ export class HTTP3Server {
 		});
 
 		this.#native.handleData((id, connectionId, data) => {
+			const webSocket = this.#webSockets.get(id);
+			if (webSocket?.connectionId === connectionId) {
+				this.#deliverReceive(
+					id,
+					data.byteLength,
+					() => webSocket.socket.receiveData(data),
+					"websocket-receive"
+				);
+				return;
+			}
 			const stream = this.#streams.get(id);
 			if (!stream || stream.connection.id !== connectionId) {
 				this.#native.completeReceive(id, data.byteLength, false);
@@ -319,7 +349,12 @@ export class HTTP3Server {
 		});
 
 		try {
-			const { maxIncompleteBodyMs = 30_000, ...nativeConfig } = config;
+			const {
+				maxIncompleteBodyMs = 30_000,
+				maxWebSocketMessageBytes = 16 * 1024 * 1024,
+				webSocketCloseTimeoutMs = 5_000,
+				...nativeConfig
+			} = config;
 			if (
 				!Number.isInteger(maxIncompleteBodyMs) ||
 				maxIncompleteBodyMs < 1 ||
@@ -330,6 +365,14 @@ export class HTTP3Server {
 				);
 			}
 			this.#maxIncompleteBodyMs = maxIncompleteBodyMs;
+			if (!Number.isSafeInteger(maxWebSocketMessageBytes) || maxWebSocketMessageBytes < 1) {
+				throw new TypeError("maxWebSocketMessageBytes must be a positive safe integer");
+			}
+			if (!Number.isInteger(webSocketCloseTimeoutMs) || webSocketCloseTimeoutMs < 1) {
+				throw new TypeError("webSocketCloseTimeoutMs must be a positive integer");
+			}
+			this.#maxWebSocketMessageBytes = maxWebSocketMessageBytes;
+			this.#webSocketCloseTimeoutMs = webSocketCloseTimeoutMs;
 			this.#maxDatagramSize = nativeConfig.maxDatagramSize ?? 1200;
 			this.#native.start({ webTransport: true, ...nativeConfig });
 		} catch (error) {
@@ -356,14 +399,74 @@ export class HTTP3Server {
 		} catch (cause) {
 			this.#reportHandlerFailure("request", stream.id, cause);
 			if (!this.#responseCommitted.has(stream.id)) {
-				try {
-					await this.#native.sendHeaders(stream.id, 500, [], true);
-				} catch {
-					// The native request may already be closed.
-				}
+				await sendHeadersBestEffort(this.#native, stream.id, 500);
 			}
 		} finally {
 			this.#responseCommitted.delete(stream.id);
+		}
+	}
+
+	async #handleWebSocketStart(id, connectionId, headers) {
+		let socket;
+		try {
+			const metadata = webSocketMetadata(headers, "HTTP/3");
+			if (typeof this.#handlers.webSocket !== "function") {
+				await sendHeadersBestEffort(this.#native, id, 501);
+				return;
+			}
+			socket = new WebSocketConnection({
+				...metadata,
+				id,
+				maxMessageBytes: this.#maxWebSocketMessageBytes,
+				closeTimeoutMs: this.#webSocketCloseTimeoutMs,
+				transport: {
+					write: (data) => this.#native.sendData(id, data, false),
+					end: () => this.#native.sendData(id, undefined, true),
+					abort: () => {
+						void this.#native.sendData(id, undefined, true).catch(() => undefined);
+					},
+				},
+				onMessage: (webSocket, data) => this.#handlers.webSocketMessage?.(webSocket, data),
+				onClose: async (webSocket, code, reason) => {
+					this.#webSockets.delete(id);
+					try {
+						await this.#handlers.webSocketClose?.(webSocket, code, reason);
+					} catch (cause) {
+						this.#reportHandlerFailure("websocket-close", id, cause);
+					}
+				},
+				onError: (_webSocket, cause) => {
+					this.#reportHandlerFailure("websocket", id, cause);
+				},
+			});
+			this.#webSockets.set(id, { connectionId, socket });
+			const decision = this.#handlers.webSocket(socket);
+			if (decision && typeof decision === "object" && "then" in decision) {
+				throw new TypeError("The WebSocket routing handler must return synchronously");
+			}
+			if (decision === false) {
+				this.#webSockets.delete(id);
+				await sendHeadersBestEffort(this.#native, id, 403);
+				return;
+			}
+			const protocol = typeof decision === "string" ? decision : "";
+			if (protocol && !socket.offeredProtocols.includes(protocol)) {
+				throw new TypeError(
+					`WebSocket subprotocol was not offered by the client: ${protocol}`
+				);
+			}
+			const accepted = await this.#native.sendHeaders(
+				id,
+				200,
+				protocol ? [["sec-websocket-protocol", protocol]] : [],
+				false
+			);
+			if (!accepted) throw new Error("Native HTTP/3 WebSocket headers were rejected");
+			await socket.accept(protocol);
+		} catch (cause) {
+			this.#webSockets.delete(id);
+			this.#reportHandlerFailure("websocket-open", id, cause);
+			await sendHeadersBestEffort(this.#native, id, socket ? 500 : 400);
 		}
 	}
 
@@ -448,11 +551,7 @@ export class HTTP3Server {
 
 	async #rejectSession(session, error) {
 		if (!this.#responseCommitted.has(session.id)) {
-			try {
-				await this.#native.sendHeaders(session.id, 500, [], true);
-			} catch {
-				// The native CONNECT request may already be closed.
-			}
+			await sendHeadersBestEffort(this.#native, session.id, 500);
 		}
 		this.#deleteSession(session);
 		this.#reportHandlerFailure("webtransport-session", session.id, error);
@@ -582,6 +681,8 @@ export class HTTP3Server {
 	#handlers = {};
 	#maxIncompleteBodyMs = 30_000;
 	#maxDatagramSize = 1200;
+	#maxWebSocketMessageBytes = 16 * 1024 * 1024;
+	#webSocketCloseTimeoutMs = 5_000;
 	#receiveTimers = new Map();
 	#receiveTimeouts = 0;
 	#reportedErrors = 0;
@@ -589,6 +690,7 @@ export class HTTP3Server {
 	#streams = new Map();
 	#sessions = new Map();
 	#webTransportStreams = new Map();
+	#webSockets = new Map();
 	#responseReaders = new Map();
 	#responseCommitted = new Set();
 }
@@ -614,4 +716,4 @@ function createAbortError(subject, errorCode) {
 	return error;
 }
 
-export { Connection, fin, Stream, WebTransportSession, WebTransportStream };
+export { Connection, fin, Stream, WebTransportSession, WebTransportStream, WebSocketConnection };

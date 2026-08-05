@@ -1,7 +1,7 @@
 {
 	"name": "@http3-server/dev-certificates",
 	"type": "module",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Zero-dependency development certificates for WebTransport and local TLS",
 	"license": "MIT-0",
 	"author": "Jonathan Neal",
@@ -40,6 +40,10 @@
 		"./node": {
 			"types": "./node.d.ts",
 			"default": "./node.js"
+		},
+		"./node/trusted": {
+			"types": "./trusted.d.ts",
+			"default": "./trusted.js"
 		}
 	},
 	"scripts": {
@@ -52,6 +56,9 @@
 		"node.d.ts",
 		"node.js",
 		"README.md",
-		"types.d.ts"
+		"trusted.d.ts",
+		"trusted.js",
+		"types.d.ts",
+		"x509.js"
 	]
 }

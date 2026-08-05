@@ -3,6 +3,28 @@
 All notable user-visible changes are recorded here. The eleven published packages share
 one version and are released together.
 
+## 0.3.0 — 2026-08-05
+
+### Added
+
+- A composed `HTTPServer` with one `.handle()` API across HTTP/3, HTTP/2, and HTTP/1.1,
+  automatic `Alt-Svc` advertisement, shared-port startup, and coordinated shutdown.
+- One WebSocket handler API across RFC 9220 HTTP/3 Extended CONNECT, RFC 8441 HTTP/2
+  Extended CONNECT, and HTTP/1.1 Upgrade, including framing, subprotocol selection,
+  bounded messages, ping/pong, and orderly close handling.
+- An opt-in trusted development-certificate profile with a private ephemeral CA,
+  cross-platform trust installation, cached rotation, and explicit removal.
+- A same-origin Vite example serving ordinary HTTPS and WebTransport across the shared
+  TCP and UDP port.
+
+### Fixed
+
+- Client-initiated unidirectional HTTP/3 streams are ignored instead of being surfaced
+  as requests, and malformed-request rejection can no longer throw from a Node-API
+  callback or mask the original handler error.
+- Vite HMR can reserve WebSockets for HTTP/1.1 Upgrade without clients selecting an
+  unsupported HTTP/2 Extended CONNECT path.
+
 ## 0.2.0 — 2026-08-04
 
 First coordinated release candidate for the complete package set.

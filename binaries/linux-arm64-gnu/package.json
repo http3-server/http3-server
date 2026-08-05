@@ -1,7 +1,7 @@
 {
 	"name": "@http3-server/linux-arm64-gnu",
 	"type": "module",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "HTTP/3 implementation for Linux arm64 with glibc",
 	"license": "MIT-0",
 	"engines": {

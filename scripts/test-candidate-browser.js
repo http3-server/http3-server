@@ -11,7 +11,9 @@ const candidateDirectory = resolve(process.argv[2] || join(projectRoot, "release
 const { platformName, root } = installCandidate(candidateDirectory);
 
 try {
-	cpSync(join(projectRoot, "scripts", "test-browser.js"), join(root, "test-browser.js"));
+	for (const filename of ["netlog-diagnostics.js", "test-browser.js"]) {
+		cpSync(join(projectRoot, "scripts", filename), join(root, filename));
+	}
 	run(process.execPath, ["test-browser.js"], { cwd: root, env: process.env });
 	console.log(`passed packed ${platformName} browser suite on Node ${process.versions.node}`);
 } finally {

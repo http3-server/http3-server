@@ -1,7 +1,7 @@
 // @ts-check
 /// <reference types="./types.d.ts" />
 
-import { mapOf } from "./mapOf.js";
+import { mapOf } from "./internal/mapOf.js";
 
 /** @type {http3.MapConstructor<http3.WebTransportStream>} */
 const WebTransportStreams = mapOf("WebTransportStream");
