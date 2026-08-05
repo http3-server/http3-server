@@ -1,8 +1,9 @@
 # Development Certificates for HTTP/3 and WebTransport
 
-`@http3-server/dev-certificates` creates short-lived ECDSA P-256 certificates for local
-TLS, HTTP/3, and WebTransport development. It has no runtime dependencies and does not
-install a certificate authority or change a system trust store.
+`@http3-server/dev-certificates` creates ECDSA P-256 certificates for local TLS,
+HTTP/3, and WebTransport development. It has no runtime dependencies. Its default API
+creates short-lived self-signed certificates without changing trust stores; an explicit
+Node.js entry point manages a local certificate authority for ordinary browser HTTPS.
 
 The portable entry point uses the standard Web Crypto API and is tested on Node.js,
 Bun, and Deno. The Node.js entry point adds safe filesystem caching and rotation.
@@ -43,7 +44,7 @@ no permissions; Bun and Node.js can use it without runtime-specific imports.
 
 ```js
 import { ensureDevelopmentCertificate } from "@http3-server/dev-certificates/node";
-import { HTTP3Server } from "http3s";
+import { HTTP3Server } from "@http3-server/server";
 
 const certificate = await ensureDevelopmentCertificate({ directory: ".http3s" });
 const server = new HTTP3Server();
@@ -62,6 +63,38 @@ gives private keys owner-only permissions where the platform supports them. Over
 callers therefore always receive a matching pair. Add the chosen directory to the
 application's ignore file.
 
+## Trusted browser HTTPS
+
+Ordinary browser navigation cannot use WebTransport's certificate-hash exception. For
+a single trusted HTTPS origin across HTTP/1.1, HTTP/2, and HTTP/3, use the opt-in trusted
+entry point:
+
+```js
+import {
+	ensureTrustedDevelopmentCertificate,
+	removeTrustedDevelopmentCertificate,
+} from "@http3-server/dev-certificates/node/trusted";
+
+const certificate = await ensureTrustedDevelopmentCertificate({
+	directory: ".http3s/trusted",
+	dnsNames: ["localhost"],
+	ipAddresses: ["127.0.0.1", "::1"],
+});
+```
+
+The first call creates a private P-256 development CA and a CA-signed server
+certificate, installs the CA in the operating system trust store, and may request
+elevation. The CA private key exists only in memory while the server certificate is
+signed and is discarded immediately afterward. The CA and server certificate rotate
+together after one year by default, so rotation requires another trust operation.
+
+Trust installation supports the macOS system keychain, Windows current-user root store,
+and Linux systems with `update-ca-certificates`, `update-ca-trust`, or p11-kit `trust`.
+Set `installTrust: false` for generation-only CI scenarios. Call
+`removeTrustedDevelopmentCertificate({ directory })` to remove the active trust anchor
+and cached key material. Firefox configurations that do not consume operating-system
+roots may require separate enterprise-root or profile configuration.
+
 ## Certificate profile
 
 Generated certificates deliberately have a narrow development profile:
@@ -76,7 +109,8 @@ The short lifetime and P-256 key make the certificate suitable for WebTransport
 certificate-hash authentication. Certificate hashes authenticate only the server; an
 application must still authenticate users and authorize WebTransport sessions.
 
-This package is not a production certificate authority, ACME client, or replacement for
-public Web PKI. Ordinary HTTPS clients will not trust these self-signed certificates
-unless configured separately; the hash bypass applies specifically to WebTransport.
-Use an automatically renewed publicly trusted certificate in production.
+Neither profile is a production certificate authority, ACME client, or replacement for
+public Web PKI. Ordinary HTTPS clients do not trust the short-lived self-signed profile;
+the hash bypass applies specifically to WebTransport. The trusted profile is for local
+development machines only. Use an automatically renewed publicly trusted certificate in
+production.

@@ -1,8 +1,8 @@
 {
 	"name": "@http3-server/server",
 	"type": "module",
-	"version": "0.2.0",
-	"description": "HTTP/3 and WebTransport server for Node.js",
+	"version": "0.3.0",
+	"description": "HTTP/3, WebTransport, and WebSocket server for Node.js",
 	"license": "MIT-0",
 	"engines": {
 		"node": ">=22"
@@ -25,6 +25,7 @@
 	"keywords": [
 		"http3",
 		"quic",
+		"websocket",
 		"webtransport",
 		"server",
 		"networking"
@@ -33,27 +34,35 @@
 	"exports": {
 		".": {
 			"types": "./types.d.ts",
-			"default": "./HTTP3Server.js"
+			"default": "./index.js"
 		}
 	},
 	"scripts": {
-		"test": "node --test test/server.test.js && npm run test:types",
+		"test": "node --test test/server.test.js test/http-server.test.js test/send-headers-best-effort.test.js test/websocket.test.js && npm run test:types",
 		"test:types": "tsc -p ../../tsconfig.json",
 		"test:integration": "node --test test/integration.test.js"
 	},
 	"files": [
 		"Connection.js",
 		"HTTP3Server.js",
+		"HTTPServer.js",
+		"index.js",
+		"internal/fetch-adapter.js",
+		"internal/mapOf.js",
+		"internal/send-headers-best-effort.js",
 		"LICENSE.md",
-		"mapOf.js",
 		"NOTICE",
 		"README.md",
 		"Stream.js",
 		"WebTransportSession.js",
 		"WebTransportStream.js",
+		"WebSocketConnection.js",
 		"types.d.ts"
 	],
 	"dependencies": {
-		"@http3-server/native": "0.2.0"
+		"@http3-server/native": "0.3.0"
+	},
+	"devDependencies": {
+		"@types/node": "24.13.3"
 	}
 }

@@ -1,7 +1,7 @@
 // @ts-check
 /// <reference types="./types.d.ts" />
 
-import { mapOf } from "./mapOf.js";
+import { mapOf } from "./internal/mapOf.js";
 
 /** HTTP/3 connection. */
 export class Connection {

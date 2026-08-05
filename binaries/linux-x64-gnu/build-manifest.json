@@ -1,7 +1,7 @@
 {
 	"formatVersion": 4,
 	"producer": "msh3-node",
-	"producerCommit": "07dcc8f6f51a173b2c4c423f220375a713be4a03",
+	"producerCommit": "9400b8d969200def51a80e7425f1a0814036680b",
 	"platform": "linux-x64-gnu",
 	"target": {
 		"os": "linux",
@@ -14,20 +14,20 @@
 	},
 	"msh3Commit": "92f23c72b50b0714d7cd39850e7b97e8ed1129e1",
 	"msquicCommit": "87b53085d76bd7920d490a6f226c9999b6614d14",
-	"msh3PatchSha256": "d6cede70757935a065697ec89cdae6a2fc55c1f60f9a9ed2390843124c26bc58",
+	"msh3PatchSha256": "805526273a119c9eb983af21b69611bdfdc0f32cd906063bd60e4b9109d04373",
 	"msquicPatchSha256": "cd48a4161c710b368f4b683ed739cab95f673606fa69e79290e382ca6893d66c",
 	"declarationSha256": "5140cc4ae656a0da057db95ea69d2f2e50e33bb22e962f77087e692ba3ecc77a",
 	"files": [
 		{
 			"name": "http3.node",
 			"bytes": 329472,
-			"sha256": "e4f1408cd57ee3e453dc404523b039d9a891144768ea929c6a80b85e6bc22532",
+			"sha256": "75fb483336df99c8b8b590103a31a394b5fe3628610253feaebca9b7be7f6c54",
 			"architecture": "x64"
 		},
 		{
 			"name": "libmsh3.so",
 			"bytes": 6879936,
-			"sha256": "0cf2b35ef72c2d3eed022c47443f0fa9d55a9facacc7b40c6ce9b23e7f1e345e",
+			"sha256": "262e79e69e2f3efcff760e8ba4fdf7a65bda4ce53b17c605384aa1fb5ee17c3b",
 			"architecture": "x64"
 		},
 		{

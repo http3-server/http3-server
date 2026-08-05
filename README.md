@@ -14,8 +14,8 @@ tool to the published packages. The handoff between the repositories is a checks
 
 | Package | Responsibility |
 | --- | --- |
-| `@http3-server/server` | Public HTTP/3 and WebTransport server API |
-| `@http3-server/dev-certificates` | Portable short-lived development certificates |
+| `@http3-server/server` | HTTP/3, WebTransport, and WebSocket API plus HTTP/2 and HTTP/1.1 fallback |
+| `@http3-server/dev-certificates` | Portable short-lived and opt-in locally trusted certificates |
 | `@http3-server/native` | Selects and loads the current platform package |
 | `@http3-server/<target>` | Native addon plus MSH3 and MsQuic runtime libraries |
 
@@ -26,8 +26,8 @@ every development machine. The local native loader uses the matching checked-out
 instead.
 
 The certificate package has no runtime dependencies and uses Web Crypto on Node.js,
-Bun, and Deno. Its Node.js adapter safely caches and rotates PEM files for
-`@http3-server/server`;
+Bun, and Deno. Its Node.js adapters safely cache short-lived WebTransport certificates
+or explicitly install a local development CA for ordinary browser HTTPS;
 see [`packages/dev-certificates/README.md`](packages/dev-certificates/README.md).
 
 ## Development
@@ -40,9 +40,9 @@ npm run verify
 ```
 
 To try WebTransport from a browser with Vite, run `npm run example:vite` and open
-<http://127.0.0.1:5173>. The tested example generates and caches its own short-lived
-certificate, starts Vite and `@http3-server/server` together, and demonstrates datagrams
-and a reliable stream without proxying WebTransport through Vite. See
+<https://localhost:4433>. The tested example creates a locally trusted certificate,
+serves Vite over HTTP/2 or HTTP/1.1 while advertising HTTP/3, and demonstrates
+same-origin datagrams and a reliable stream. See
 [`examples/vite-webtransport`](examples/vite-webtransport).
 
 `verify` is the shared local and CI gate: formatting/lint checks, native loader tests,
@@ -71,8 +71,10 @@ are maintained in [CHANGELOG.md](CHANGELOG.md).
 
 ## Project status
 
-The HTTP/3 request API is usable and the WebTransport API is experimental. The initial
-WebTransport implementation supports one session per QUIC connection, bidirectional
+The HTTP/3 request and cross-version WebSocket APIs are usable, and the WebTransport API
+is experimental. The WebSocket handler uses HTTP/3 or HTTP/2 Extended CONNECT when the
+client supports it and HTTP/1.1 Upgrade otherwise. The initial WebTransport
+implementation supports one session per QUIC connection, bidirectional
 datagrams, and client-created bidirectional streams. Chrome 151 is pinned in CI for
 accept/reject, datagrams, streams, abort, close, and reconnect. Server-created streams,
 unidirectional streams, and multiple sessions per connection remain follow-up work.

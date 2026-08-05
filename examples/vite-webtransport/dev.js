@@ -1,20 +1,58 @@
+import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ensureDevelopmentCertificate } from "@http3-server/dev-certificates/node";
-import { HTTP3Server } from "@http3-server/server";
+import { ensureTrustedDevelopmentCertificate } from "@http3-server/dev-certificates/node/trusted";
+import { HTTPServer } from "@http3-server/server";
 import { createServer } from "vite";
+import { createMiddlewareHandler } from "./vite-bridge.js";
 
 const directory = dirname(fileURLToPath(import.meta.url));
-const pageOrigin = "http://127.0.0.1:5173";
-const certificate = await ensureDevelopmentCertificate({
-	directory: join(directory, ".http3-server"),
+const hostname = "localhost";
+const port = 4433;
+const origin = `https://${hostname}:${port}`;
+const certificate = await ensureTrustedDevelopmentCertificate({
+	directory: join(homedir(), ".http3-server"),
+	dnsNames: [hostname],
+	ipAddresses: ["127.0.0.1", "::1"],
 });
-const http3 = new HTTP3Server().handle({
+const server = new HTTPServer();
+
+await server.start({
+	address: "127.0.0.1",
+	port,
+	certificateFile: certificate.certificateFile,
+	enableHTTP2ConnectProtocol: false,
+	privateKeyFile: certificate.privateKeyFile,
+});
+
+let vite;
+try {
+	vite = await createServer({
+		configFile: false,
+		root: directory,
+		server: {
+			allowedHosts: [hostname],
+			middlewareMode: { server: server.tcpServer },
+			ws: {
+				clientPort: port,
+				host: hostname,
+				protocol: "wss",
+				server: server.tcpServer,
+			},
+		},
+	});
+} catch (error) {
+	await server.stop({ gracePeriodMs: 0 });
+	throw error;
+}
+
+server.handle({
 	error(error) {
 		console.error(error);
 	},
+	stream: createMiddlewareHandler(vite.middlewares),
 	session(session) {
-		if (session.path !== "/game" || session.headers.origin !== pageOrigin) return false;
+		if (session.path !== "/game" || session.headers.origin !== origin) return false;
 	},
 	datagram(session, data) {
 		session.sendDatagram(data);
@@ -27,42 +65,15 @@ const http3 = new HTTP3Server().handle({
 	},
 });
 
-await http3.start({
-	address: "127.0.0.1",
-	port: 4433,
-	certificateFile: certificate.certificateFile,
-	privateKeyFile: certificate.privateKeyFile,
-});
-
-const vite = await createServer({
-	root: directory,
-	define: {
-		"globalThis.__HTTP3_CONFIG__": JSON.stringify({
-			certificateHash: [...certificate.certificateHash],
-			url: `https://127.0.0.1:${http3.port}/game`,
-		}),
-	},
-	server: {
-		host: "127.0.0.1",
-		port: 5173,
-		strictPort: true,
-	},
-});
-
-try {
-	await vite.listen();
-	vite.printUrls();
-	console.log(`WebTransport server: https://127.0.0.1:${http3.port}/game`);
-} catch (error) {
-	await http3.stop({ gracePeriodMs: 0 });
-	throw error;
-}
+console.log(`App: ${origin}/`);
+console.log(`HTTP/2 and HTTP/1.1: 127.0.0.1:${port}/tcp`);
+console.log(`HTTP/3 and WebTransport: 127.0.0.1:${port}/udp`);
 
 let stopping = false;
 async function stop() {
 	if (stopping) return;
 	stopping = true;
-	await Promise.all([vite.close(), http3.stop({ gracePeriodMs: 1_000 })]);
+	await Promise.all([vite.close(), server.stop({ gracePeriodMs: 1_000 })]);
 }
 
 process.once("SIGINT", stop);

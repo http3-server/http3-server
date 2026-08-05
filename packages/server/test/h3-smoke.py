@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from aioquic.asyncio.client import connect
 from aioquic.asyncio.protocol import QuicConnectionProtocol
-from aioquic.h3.connection import H3_ALPN, H3Connection, HeadersState
+from aioquic.h3.connection import H3_ALPN, H3Connection, HeadersState, Setting
 from aioquic.h3.events import DataReceived, DatagramReceived, HeadersReceived
 from aioquic.quic.configuration import QuicConfiguration
 from aioquic.quic.events import ConnectionTerminated
@@ -20,6 +20,7 @@ class SmokeClient(QuicConnectionProtocol):
         self.events = defaultdict(list)
         self.waiters = {}
         self.header_waiters = set()
+        self.data_waiters = set()
         self.datagram_waiter = None
         self.connection_terminated = self._loop.create_future()
 
@@ -55,6 +56,8 @@ class SmokeClient(QuicConnectionProtocol):
                 if 100 <= response_status < 200:
                     self.http._stream[stream_id].headers_recv_state = HeadersState.INITIAL
             if stream_id in self.header_waiters and isinstance(http_event, HeadersReceived):
+                self._complete(stream_id)
+            elif stream_id in self.data_waiters and isinstance(http_event, DataReceived):
                 self._complete(stream_id)
             elif http_event.stream_ended:
                 self._complete(stream_id)
@@ -131,6 +134,36 @@ class SmokeClient(QuicConnectionProtocol):
         response = await asyncio.wait_for(waiter, timeout=5)
         return stream_id, response
 
+    async def open_websocket(self, authority, path, protocol):
+        stream_id = self._quic.get_next_available_stream_id()
+        waiter = self._loop.create_future()
+        self.waiters[stream_id] = waiter
+        self.header_waiters.add(stream_id)
+        self.http.send_headers(
+            stream_id,
+            [
+                (b":method", b"CONNECT"),
+                (b":scheme", b"https"),
+                (b":authority", authority.encode()),
+                (b":path", path.encode()),
+                (b":protocol", b"websocket"),
+                (b"sec-websocket-version", b"13"),
+                (b"sec-websocket-protocol", protocol.encode()),
+            ],
+            end_stream=False,
+        )
+        self.transmit()
+        response = await asyncio.wait_for(waiter, timeout=5)
+        return stream_id, response
+
+    async def send_websocket_data(self, stream_id, data):
+        waiter = self._loop.create_future()
+        self.waiters[stream_id] = waiter
+        self.data_waiters.add(stream_id)
+        self.http.send_data(stream_id, data, end_stream=False)
+        self.transmit()
+        return await asyncio.wait_for(waiter, timeout=5)
+
     async def slow_upload(self, authority, path):
         stream_id = self._quic.get_next_available_stream_id()
         waiter = self._loop.create_future()
@@ -161,6 +194,7 @@ class SmokeClient(QuicConnectionProtocol):
     def _complete(self, stream_id):
         waiter = self.waiters.pop(stream_id, None)
         self.header_waiters.discard(stream_id)
+        self.data_waiters.discard(stream_id)
         if waiter is not None and not waiter.done():
             waiter.set_result(self.events.pop(stream_id))
 
@@ -182,6 +216,30 @@ def has_header(events, name, value):
         for event in events
         if isinstance(event, HeadersReceived)
     )
+
+
+def masked_websocket_frame(opcode, payload):
+    assert len(payload) < 126
+    mask = b"h3ws"
+    masked = bytes(value ^ mask[index % 4] for index, value in enumerate(payload))
+    return bytes((0x80 | opcode, 0x80 | len(payload))) + mask + masked
+
+
+def websocket_frame(events):
+    data = body(events)
+    assert len(data) >= 2
+    assert data[0] & 0x80
+    assert not data[1] & 0x80
+    length = data[1] & 0x7F
+    offset = 2
+    if length == 126:
+        length = int.from_bytes(data[offset : offset + 2], "big")
+        offset += 2
+    elif length == 127:
+        length = int.from_bytes(data[offset : offset + 8], "big")
+        offset += 8
+    assert len(data) == offset + length
+    return data[0] & 0x0F, data[offset:]
 
 
 def configuration():
@@ -316,11 +374,48 @@ async def run_handler_failure(host, port):
         client.close()
 
 
+async def run_unidirectional_streams(host, port):
+    authority = f"{host}:{port}"
+    async with connect(host, port, configuration=configuration(), create_protocol=SmokeClient) as client:
+        # H3Connection has already opened the control and QPACK unidirectional
+        # streams. Add a reserved GREASE stream type to cover unknown streams.
+        stream_id = client._quic.get_next_available_stream_id(is_unidirectional=True)
+        client._quic.send_stream_data(stream_id, b"\x21ignored", end_stream=True)
+        client.transmit()
+        await asyncio.sleep(0.05)
+
+        response = await client.get(authority, "/after-unidirectional-streams")
+        assert status(response) == 204
+        await asyncio.sleep(0.1)
+        client.close()
+
+
 async def run_webtransport_rejection(host, port, expected_status):
     authority = f"{host}:{port}"
     async with connect(host, port, configuration=configuration(), create_protocol=SmokeClient) as client:
         response = await client.webtransport_connect(authority, "/rejected")
         assert status(response) == expected_status
+        client.close()
+
+
+async def run_websocket(host, port):
+    authority = f"{host}:{port}"
+    async with connect(host, port, configuration=configuration(), create_protocol=SmokeClient) as client:
+        stream_id, response = await client.open_websocket(authority, "/websocket", "echo")
+        assert client.http.received_settings[Setting.ENABLE_CONNECT_PROTOCOL] == 1
+        assert status(response) == 200
+        assert has_header(response, b"sec-websocket-protocol", b"echo")
+
+        response = await client.send_websocket_data(
+            stream_id, masked_websocket_frame(0x1, b"over-h3")
+        )
+        assert websocket_frame(response) == (0x1, b"over-h3")
+
+        response = await client.send_websocket_data(
+            stream_id, masked_websocket_frame(0x8, b"\x03\xe8")
+        )
+        assert websocket_frame(response) == (0x8, b"\x03\xe8")
+        await asyncio.sleep(0.1)
         client.close()
 
 
@@ -549,8 +644,10 @@ def main():
             "streaming-response",
             "public-streaming-response",
             "handler-failure",
+            "unidirectional-streams",
             "webtransport-501",
             "webtransport-403",
+            "websocket",
             "header-limits",
             "adversarial-headers",
             "connection-churn",
@@ -583,10 +680,14 @@ def main():
         asyncio.run(run_streaming_response(arguments.host, arguments.port, require_cookies=True))
     elif arguments.mode == "handler-failure":
         asyncio.run(run_handler_failure(arguments.host, arguments.port))
+    elif arguments.mode == "unidirectional-streams":
+        asyncio.run(run_unidirectional_streams(arguments.host, arguments.port))
     elif arguments.mode == "webtransport-501":
         asyncio.run(run_webtransport_rejection(arguments.host, arguments.port, 501))
     elif arguments.mode == "webtransport-403":
         asyncio.run(run_webtransport_rejection(arguments.host, arguments.port, 403))
+    elif arguments.mode == "websocket":
+        asyncio.run(run_websocket(arguments.host, arguments.port))
     elif arguments.mode == "header-limits":
         asyncio.run(run_header_limits(arguments.host, arguments.port))
     elif arguments.mode == "adversarial-headers":

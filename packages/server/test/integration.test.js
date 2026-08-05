@@ -4,7 +4,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { HTTP3Server as NativeHTTP3Server } from "@http3-server/native";
-import { fin, HTTP3Server } from "@http3-server/server";
+import { fin, HTTP3Server, HTTPServer } from "@http3-server/server";
 
 const execFileAsync = promisify(execFile);
 const python = process.env.AIOQUIC_PYTHON;
@@ -40,6 +40,39 @@ const runClient = (server, mode) =>
 	);
 
 test(
+	"serves HTTP/3 and WebTransport through the composed fallback server",
+	{ timeout: 15_000 },
+	async () => {
+		assert.ok(python, "AIOQUIC_PYTHON must name the pinned integration-client interpreter");
+		const protocols = [];
+		const server = new HTTPServer().handle({
+			stream(request) {
+				protocols.push(request.protocol);
+				return new Response("baseline");
+			},
+			session: () => undefined,
+		});
+		await server.start(config());
+
+		try {
+			const result = await execFileAsync(
+				python,
+				[
+					fileURLToPath(new URL("h3-smoke.py", import.meta.url)),
+					server.address,
+					String(server.port),
+				],
+				{ timeout: 10_000 }
+			);
+			assert.equal(result.stderr, "");
+			assert.deepEqual(new Set(protocols), new Set(["HTTP/3"]));
+		} finally {
+			await server.stop();
+		}
+	}
+);
+
+test(
 	"serves concurrent HTTP/3 streams and accepts a WebTransport session",
 	{ timeout: 15_000 },
 	async () => {
@@ -68,6 +101,49 @@ test(
 		}
 	}
 );
+
+test("serves WebSockets over HTTP/3 Extended CONNECT", { timeout: 15_000 }, async () => {
+	assert.ok(python, "AIOQUIC_PYTHON must name the pinned integration-client interpreter");
+	const opened = [];
+	const messages = [];
+	const closed = [];
+	const server = new HTTP3Server().handle({
+		webSocket(socket) {
+			opened.push({
+				httpVersion: socket.httpVersion,
+				path: socket.path,
+				url: socket.url,
+				offeredProtocols: socket.offeredProtocols,
+			});
+			return "echo";
+		},
+		async webSocketMessage(socket, data) {
+			messages.push(data);
+			await socket.send(data);
+		},
+		webSocketClose(_socket, code, reason) {
+			closed.push({ code, reason });
+		},
+	});
+	await server.start(config());
+
+	try {
+		const result = await runClient(server, "websocket");
+		assert.equal(result.stderr, "");
+		assert.deepEqual(opened, [
+			{
+				httpVersion: "HTTP/3",
+				path: "/websocket",
+				url: `wss://${server.address}:${server.port}/websocket`,
+				offeredProtocols: ["echo"],
+			},
+		]);
+		assert.deepEqual(messages, ["over-h3"]);
+		assert.deepEqual(closed, [{ code: 1000, reason: "" }]);
+	} finally {
+		await server.stop({ gracePeriodMs: 0 });
+	}
+});
 
 test(
 	"drains accepted work and rejects new streams on an existing connection",
@@ -324,6 +400,35 @@ test("contains request handler failures and sends 500", { timeout: 15_000 }, asy
 		await server.stop({ gracePeriodMs: 0 });
 	}
 });
+
+test(
+	"ignores client-initiated unidirectional streams at the native boundary",
+	{ timeout: 15_000 },
+	async () => {
+		assert.ok(python, "AIOQUIC_PYTHON must name the pinned integration-client interpreter");
+		const started = deferred();
+		const requests = [];
+		const server = new NativeHTTP3Server();
+		server.handleStart((_id, address, port) => started.resolve({ address, port }));
+		server.handleRequest((id, _connectionId, headers) => {
+			requests.push({ id, headers });
+			if (headers[":path"] === "/after-unidirectional-streams") {
+				void server.sendHeaders(id, 204, [], true);
+			}
+		});
+		server.start(config());
+		const endpoint = await started.promise;
+
+		try {
+			const result = await runClient(endpoint, "unidirectional-streams");
+			assert.equal(result.stderr, "");
+			assert.equal(requests.length, 1);
+			assert.equal(requests[0].headers[":path"], "/after-unidirectional-streams");
+		} finally {
+			await server.stop({ gracePeriodMs: 0 });
+		}
+	}
+);
 
 test(
 	"rejects WebTransport CONNECT when native has no session handler",

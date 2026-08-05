@@ -33,6 +33,17 @@ export namespace http3 {
 			reason: "finished" | "aborted",
 			errorCode?: number
 		) => void | Promise<void>;
+		/** Synchronously accepts a WebSocket, rejects with false, or selects one offered subprotocol. */
+		webSocket?: (webSocket: WebSocketConnection) => void | true | false | string;
+		webSocketMessage?: (
+			webSocket: WebSocketConnection,
+			data: string | Uint8Array
+		) => void | Promise<void>;
+		webSocketClose?: (
+			webSocket: WebSocketConnection,
+			code: number,
+			reason: string
+		) => void | Promise<void>;
 	}
 
 	interface Configuration {
@@ -65,6 +76,10 @@ export namespace http3 {
 		maxUrlLength?: number;
 		/** Maximum time application delivery may hold a receive pending. Defaults to 30 seconds. */
 		maxIncompleteBodyMs?: number;
+		/** Maximum reassembled WebSocket message size. Defaults to 16 MiB. */
+		maxWebSocketMessageBytes?: number;
+		/** Time to await the peer's WebSocket close frame. Defaults to 5 seconds. */
+		webSocketCloseTimeoutMs?: number;
 		port?: number;
 		privateKeyFile: string;
 		webTransport?: boolean;
@@ -141,12 +156,69 @@ export namespace http3 {
 	}
 }
 
+export namespace http {
+	type Protocol = "HTTP/1.1" | "HTTP/2" | "HTTP/3";
+
+	interface TCPStream extends Request {
+		readonly protocol: "HTTP/1.1" | "HTTP/2";
+	}
+
+	interface Handlers {
+		error?: (error: HTTPServerError | HTTP3ServerError) => void | Promise<void>;
+		/** HTTP/3 connections only; the TCP listener remains available as server.tcpServer. */
+		connection?: http3.Handlers["connection"];
+		stream?: (stream: TCPStream | Stream) => void | Response | Promise<void | Response>;
+		session?: http3.Handlers["session"];
+		datagram?: http3.Handlers["datagram"];
+		webTransportStream?: http3.Handlers["webTransportStream"];
+		webTransportData?: http3.Handlers["webTransportData"];
+		webTransportStreamEnd?: http3.Handlers["webTransportStreamEnd"];
+		webSocket?: http3.Handlers["webSocket"];
+		webSocketMessage?: http3.Handlers["webSocketMessage"];
+		webSocketClose?: http3.Handlers["webSocketClose"];
+	}
+
+	interface Configuration extends http3.Configuration {
+		/** Allows HTTP/1.1 ALPN fallback on the TCP listener. Defaults to true. */
+		allowHTTP1?: boolean;
+		/** Alt-Svc lifetime in seconds. Defaults to 3,600. */
+		altSvcMaxAge?: number;
+		/** Advertises Extended CONNECT on HTTP/2. Defaults to true. */
+		enableHTTP2ConnectProtocol?: boolean;
+	}
+
+	type ServerErrorCode = "ERR_HTTP_HANDLER_FAILURE" | "ERR_HTTP_TCP_SERVER";
+
+	interface ServerErrorDetails {
+		cause?: unknown;
+		id?: string;
+		operation?: string;
+		protocol?: Protocol | "TCP";
+	}
+}
+
 export const fin: unique symbol;
 
 export class HTTP3ServerError extends Error {
 	readonly code: http3.ServerErrorCode;
 	readonly details: Readonly<http3.ServerErrorDetails>;
 	constructor(code: http3.ServerErrorCode, message: string, details?: http3.ServerErrorDetails);
+}
+
+export class HTTPServerError extends Error {
+	readonly code: http.ServerErrorCode;
+	readonly details: Readonly<http.ServerErrorDetails>;
+	constructor(code: http.ServerErrorCode, message: string, details?: http.ServerErrorDetails);
+}
+
+export class HTTPServer {
+	readonly address: string | undefined;
+	readonly port: number | undefined;
+	readonly http3: HTTP3Server;
+	readonly tcpServer: import("node:http2").Http2SecureServer | undefined;
+	handle(handlers: http.Handlers): this;
+	start(config: http.Configuration): Promise<void>;
+	stop(options?: http3.StopOptions): Promise<void>;
 }
 
 export class HTTP3Server {
@@ -200,6 +272,25 @@ export class WebTransportStream {
 	readonly direction: "bidirectional";
 	readonly id: http3.WebTransportStreamId;
 	readonly session: WebTransportSession;
+
 	send(data: Uint8Array, options?: { fin?: boolean }): boolean;
 	close(data?: Uint8Array): boolean;
+}
+
+export class WebSocketConnection {
+	static readonly CONNECTING: 0;
+	static readonly OPEN: 1;
+	static readonly CLOSING: 2;
+	static readonly CLOSED: 3;
+	readonly id: string;
+	readonly httpVersion: http.Protocol;
+	readonly url: string;
+	readonly path: string;
+	readonly headers: Headers;
+	readonly offeredProtocols: readonly string[];
+	readonly protocol: string;
+	readonly extensions: string;
+	readonly readyState: 0 | 1 | 2 | 3;
+	send(data: string | ArrayBuffer | ArrayBufferView): Promise<boolean>;
+	close(code?: number, reason?: string): Promise<boolean>;
 }

@@ -1,4 +1,3 @@
-const config = globalThis.__HTTP3_CONFIG__;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 const connectButton = document.querySelector("#connect");
@@ -38,18 +37,12 @@ async function connect() {
 	connectButton.disabled = true;
 	status.textContent = "Connecting…";
 	try {
-		const activeTransport = new WebTransport(config.url, {
-			serverCertificateHashes: [
-				{
-					algorithm: "sha-256",
-					value: new Uint8Array(config.certificateHash),
-				},
-			],
-		});
+		const url = `${location.origin}/game`;
+		const activeTransport = new WebTransport(url);
 		await activeTransport.ready;
 		transport = activeTransport;
 		setConnected(true);
-		writeLog(`connected to ${config.url}`);
+		writeLog(`connected to ${url}`);
 		void readDatagrams(activeTransport).catch((error) => {
 			if (transport === activeTransport) {
 				writeLog(error instanceof Error ? error.message : String(error));
