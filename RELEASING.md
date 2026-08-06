@@ -104,6 +104,26 @@ Use the same npm dist-tag for every package. Move to `latest` only after the can
 passes the eight-target Node 22/24/26 load matrix, the packed protocol/browser gates,
 and the scheduled promotion soak without unbounded memory, hangs, or native crashes.
 
+Promotion is a separate, manually confirmed workflow because npm trusted publishing
+authenticates `npm publish`, but not `npm dist-tag`. Create a short-lived granular token
+with bypass 2FA and read/write access limited to the eleven package names, store it as
+the `NPM_PROMOTION_TOKEN` secret in the protected `npm` GitHub environment, and dispatch:
+
+```sh
+gh workflow run promote.yml \
+  --repo http3-server/http3-server \
+  --ref main \
+  -f soak_run_id=1234567890 \
+  -f version=0.2.0 \
+  -f 'confirmation=promote 0.2.0 to latest'
+```
+
+The workflow requires a successful manually dispatched soak of the exact annotated
+version tag. It verifies that every package already exists at the requested version and
+has that version on `next`, then advances `latest` in dependency order and verifies both
+tags. Retries skip packages that are already promoted. Revoke the short-lived token and
+remove the environment secret after all tags converge.
+
 After all packages are visible, create the annotated `v0.2.0` tag and GitHub release
 from the same candidate commit. Never tag a partial publication.
 
