@@ -1,7 +1,7 @@
 {
 	"name": "http3.root",
 	"type": "module",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"packageManager": "npm@11.18.0",
 	"description": "Release workspace for the http3-server HTTP/3, WebTransport, and WebSocket server",
 	"private": true,

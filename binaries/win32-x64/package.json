@@ -1,7 +1,7 @@
 {
 	"name": "@http3-server/win32-x64",
 	"type": "module",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "HTTP/3 implementation for Windows x64",
 	"license": "MIT-0",
 	"engines": {

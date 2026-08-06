@@ -1,7 +1,7 @@
 {
 	"name": "@http3-server/linux-x64-gnu",
 	"type": "module",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "HTTP/3 implementation for Linux x64 with glibc",
 	"license": "MIT-0",
 	"engines": {

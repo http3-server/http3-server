@@ -1,7 +1,7 @@
 {
 	"name": "@http3-server/dev-certificates",
 	"type": "module",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "Zero-dependency development certificates for WebTransport and local TLS",
 	"license": "MIT-0",
 	"author": "Jonathan Neal",
