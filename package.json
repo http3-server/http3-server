@@ -33,6 +33,7 @@
 		"pack:check:browser": "node scripts/pack-release.js --dry-run --local --browser",
 		"pack:check:protocol": "node scripts/pack-release.js --dry-run --local --protocol",
 		"pack:release": "node scripts/pack-release.js --destination=release",
+		"release:promote": "node scripts/promote-release.js",
 		"soak": "node --expose-gc scripts/run-soak.js",
 		"stress": "node scripts/run-stress.js",
 		"test": "node --test scripts/*.test.js && npm test --workspaces --if-present",
