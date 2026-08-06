@@ -34,7 +34,7 @@ jobs:
       - run: npm run verify
       - run: npm run check:release:strict
       - run: npm run pack:release
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: npm-release-candidate
           path: release/
