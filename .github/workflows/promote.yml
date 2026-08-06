@@ -60,7 +60,7 @@ jobs:
             echo "Confirmation must exactly match: promote $VERSION to latest" >&2
             exit 1
           fi
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Verify the soak commit is still the release tag

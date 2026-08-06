@@ -15,7 +15,7 @@ jobs:
   pack:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
       - uses: actions/setup-node@v6
@@ -64,7 +64,7 @@ jobs:
           - { runner: windows-11-arm, platform: win32-arm64 }
           - { runner: windows-2025, platform: win32-x64 }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
       - uses: actions/setup-node@v6
@@ -96,7 +96,7 @@ jobs:
           - { runner: windows-11-arm, platform: win32-arm64, node: 24, python_architecture: x64 }
           - { runner: windows-2025, platform: win32-x64, node: 24, python_architecture: x64 }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
       - uses: actions/setup-node@v6
@@ -129,7 +129,7 @@ jobs:
           - { runner: ubuntu-24.04, platform: linux-x64-musl, node: 24 }
           - { runner: ubuntu-24.04, platform: linux-x64-musl, node: 26 }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
           name: npm-release-candidate
@@ -153,7 +153,7 @@ jobs:
           - { runner: ubuntu-24.04-arm, platform: linux-arm64-musl }
           - { runner: ubuntu-24.04, platform: linux-x64-musl }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
           name: npm-release-candidate
@@ -171,7 +171,7 @@ jobs:
     name: Packed browser / Chrome 151 / Node 24
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
       - uses: actions/setup-node@v6
