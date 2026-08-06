@@ -119,47 +119,45 @@ test("can reserve WebSockets for an attached HTTP/1.1-only integration", async (
 	}
 });
 
-test(
-	"uses one WebSocket handler over HTTP/2 Extended CONNECT and HTTP/1.1 Upgrade",
-	{ timeout: 15_000 },
-	async () => {
-		const protocols = [];
-		const closed = [];
-		const server = new HTTPServer().handle({
-			webSocket(socket) {
-				protocols.push(socket.httpVersion);
-				return socket.offeredProtocols.includes("echo") ? "echo" : undefined;
-			},
-			async webSocketMessage(socket, data) {
-				await socket.send(data);
-			},
-			webSocketClose(socket, code) {
-				closed.push([socket.httpVersion, code]);
-			},
-		});
-		await server.start({
-			address: "127.0.0.1",
-			port: 0,
-			certificateFile,
-			privateKeyFile,
-		});
+test("uses one WebSocket handler over HTTP/2 Extended CONNECT and HTTP/1.1 Upgrade", {
+	timeout: 15_000,
+}, async () => {
+	const protocols = [];
+	const closed = [];
+	const server = new HTTPServer().handle({
+		webSocket(socket) {
+			protocols.push(socket.httpVersion);
+			return socket.offeredProtocols.includes("echo") ? "echo" : undefined;
+		},
+		async webSocketMessage(socket, data) {
+			await socket.send(data);
+		},
+		webSocketClose(socket, code) {
+			closed.push([socket.httpVersion, code]);
+		},
+	});
+	await server.start({
+		address: "127.0.0.1",
+		port: 0,
+		certificateFile,
+		privateKeyFile,
+	});
 
-		try {
-			assert.equal(await webSocketHTTP2(server.port, "over-h2"), "over-h2");
-			assert.equal(await webSocketHTTP1(server.port, "over-h1"), "over-h1");
-			assert.deepEqual(protocols, ["HTTP/2", "HTTP/1.1"]);
-			for (let attempt = 0; closed.length < 2 && attempt < 50; attempt += 1) {
-				await new Promise((resolve) => setTimeout(resolve, 10));
-			}
-			assert.deepEqual(closed, [
-				["HTTP/2", 1000],
-				["HTTP/1.1", 1000],
-			]);
-		} finally {
-			await server.stop({ gracePeriodMs: 0 });
+	try {
+		assert.equal(await webSocketHTTP2(server.port, "over-h2"), "over-h2");
+		assert.equal(await webSocketHTTP1(server.port, "over-h1"), "over-h1");
+		assert.deepEqual(protocols, ["HTTP/2", "HTTP/1.1"]);
+		for (let attempt = 0; closed.length < 2 && attempt < 50; attempt += 1) {
+			await new Promise((resolve) => setTimeout(resolve, 10));
 		}
+		assert.deepEqual(closed, [
+			["HTTP/2", 1000],
+			["HTTP/1.1", 1000],
+		]);
+	} finally {
+		await server.stop({ gracePeriodMs: 0 });
 	}
-);
+});
 
 test("leaves HTTP/1.1 upgrades to an attached integration without a WebSocket handler", async () => {
 	const server = new HTTPServer();
