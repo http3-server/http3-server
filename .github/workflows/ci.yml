@@ -15,8 +15,8 @@ jobs:
     name: Development certificates / Node, Bun, and Deno
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -37,10 +37,10 @@ jobs:
       matrix:
         node: [22, 24, 26]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -76,10 +76,10 @@ jobs:
           - runner: windows-2025
             platform: win32-x64
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -104,14 +104,14 @@ jobs:
           - { runner: windows-11-arm, platform: win32-arm64, node: 24, python_architecture: x64 }
           - { runner: windows-2025, platform: win32-x64, node: 24, python_architecture: x64 }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           architecture: ${{ matrix.python_architecture }}
@@ -132,7 +132,7 @@ jobs:
           - { runner: ubuntu-24.04, platform: linux-x64-musl, node: 24 }
           - { runner: ubuntu-24.04, platform: linux-x64-musl, node: 26 }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
       - name: Test the workspace and packed local candidate on musl
@@ -153,7 +153,7 @@ jobs:
           - { runner: ubuntu-24.04-arm, platform: linux-arm64-musl }
           - { runner: ubuntu-24.04, platform: linux-x64-musl }
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
       - name: Run HTTP/3 and WebTransport integration on musl
@@ -169,10 +169,10 @@ jobs:
     needs: fast
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -191,14 +191,14 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           lfs: true
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
       - run: npm ci
