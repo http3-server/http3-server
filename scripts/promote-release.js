@@ -40,6 +40,28 @@ export function promotionPlan(states, version) {
 	});
 }
 
+export async function verifyTagConvergence(
+	names,
+	version,
+	readTags,
+	{
+		attempts = 6,
+		delayMs = 2_000,
+		sleep = (duration) => new Promise((done) => setTimeout(done, duration)),
+	} = {}
+) {
+	const pending = new Set(names);
+	for (let attempt = 1; attempt <= attempts; attempt += 1) {
+		for (const name of pending) {
+			const tags = readTags(name);
+			if (tags.latest === version && tags.next === version) pending.delete(name);
+		}
+		if (pending.size === 0) return;
+		if (attempt < attempts) await sleep(delayMs);
+	}
+	throw new Error(`${[...pending].join(", ")} tags did not converge on ${version}`);
+}
+
 function registryState(npmExecPath, name, version) {
 	return {
 		publishedVersion: registryValue(npmExecPath, `${name}@${version}`, "version"),
@@ -47,7 +69,7 @@ function registryState(npmExecPath, name, version) {
 	};
 }
 
-function main() {
+async function main() {
 	const npmExecPath = process.env.npm_execpath;
 	if (!npmExecPath) throw new Error("Run promotion through an npm package script");
 	const version = process.argv
@@ -82,15 +104,13 @@ function main() {
 	}
 
 	if (!promote) return;
-	for (const name of publicationOrder) {
-		const tags = registryValue(npmExecPath, name, "dist-tags");
-		if (tags.latest !== version || tags.next !== version) {
-			throw new Error(`${name} tags did not converge on ${version}`);
-		}
-	}
+	await verifyTagConvergence(publicationOrder, version, (name) =>
+		registryValue(npmExecPath, name, "dist-tags")
+	);
 	console.log(
 		`verified latest and next at ${version} for all ${publicationOrder.length} packages`
 	);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) main();
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href)
+	await main();
