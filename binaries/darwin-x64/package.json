@@ -1,7 +1,7 @@
 {
 	"name": "@http3-server/darwin-x64",
 	"type": "module",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "HTTP/3 implementation for Darwin x64",
 	"license": "MIT-0",
 	"engines": {

@@ -3,6 +3,13 @@
 All notable user-visible changes are recorded here. The eleven published packages share
 one version and are released together.
 
+## 0.3.1 — 2026-08-06
+
+### Fixed
+
+- HTTP/3 request streams that receive data or terminate before their initial HEADERS
+  are rejected natively and are never surfaced to JavaScript as malformed requests.
+
 ## 0.3.0 — 2026-08-05
 
 ### Added

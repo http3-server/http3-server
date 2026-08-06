@@ -1,7 +1,7 @@
 {
 	"name": "@http3-server/server",
 	"type": "module",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "HTTP/3, WebTransport, and WebSocket server for Node.js",
 	"license": "MIT-0",
 	"engines": {
@@ -60,7 +60,7 @@
 		"types.d.ts"
 	],
 	"dependencies": {
-		"@http3-server/native": "0.3.0"
+		"@http3-server/native": "0.3.1"
 	},
 	"devDependencies": {
 		"@types/node": "24.13.3"
