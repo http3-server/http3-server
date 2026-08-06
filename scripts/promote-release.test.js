@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { promotionPlan } from "./promote-release.js";
+import { promotionPlan, verifyTagConvergence } from "./promote-release.js";
 import { publicationOrder } from "./publish-candidate.js";
 
 function registryStates(version = "0.3.1") {
@@ -37,4 +37,30 @@ test("promotion refuses incomplete, unpublished, or unsoaked package state", () 
 	const wrongNext = registryStates();
 	wrongNext.get("@http3-server/native").distTags.next = "0.3.0";
 	assert.throws(() => promotionPlan(wrongNext, "0.3.1"), /next is 0.3.0/);
+});
+
+test("promotion verification tolerates registry propagation delay", async () => {
+	let reads = 0;
+	await verifyTagConvergence(
+		["@http3-server/server"],
+		"0.3.1",
+		() => {
+			reads += 1;
+			return { latest: reads === 1 ? "0.3.0" : "0.3.1", next: "0.3.1" };
+		},
+		{ attempts: 2, delayMs: 0, sleep: async () => undefined }
+	);
+	assert.equal(reads, 2);
+});
+
+test("promotion verification reports packages that never converge", async () => {
+	await assert.rejects(
+		verifyTagConvergence(
+			["@http3-server/server"],
+			"0.3.1",
+			() => ({ latest: "0.3.0", next: "0.3.1" }),
+			{ attempts: 2, delayMs: 0, sleep: async () => undefined }
+		),
+		/@http3-server\/server tags did not converge/
+	);
 });

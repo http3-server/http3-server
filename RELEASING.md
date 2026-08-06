@@ -122,7 +122,9 @@ The workflow requires a successful manually dispatched soak of the exact annotat
 version tag. It verifies that every package already exists at the requested version and
 has that version on `next`, then advances `latest` in dependency order and verifies both
 tags. Retries skip packages that are already promoted. Revoke the short-lived token and
-remove the environment secret after all tags converge.
+remove the environment secret after all tags converge. Final verification retries
+bounded registry reads because npm distribution-tag updates can take a few seconds to
+propagate across registry edges.
 
 After all packages are visible, create the annotated `v0.2.0` tag and GitHub release
 from the same candidate commit. Never tag a partial publication.
