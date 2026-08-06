@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: builds
           path: native-builds
@@ -71,7 +71,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: npm-release-candidate
           path: release
@@ -107,7 +107,7 @@ jobs:
         with:
           python-version: "3.13"
           architecture: ${{ matrix.python_architecture }}
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: npm-release-candidate
           path: release
@@ -130,7 +130,7 @@ jobs:
           - { runner: ubuntu-24.04, platform: linux-x64-musl, node: 26 }
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: npm-release-candidate
           path: release
@@ -154,7 +154,7 @@ jobs:
           - { runner: ubuntu-24.04, platform: linux-x64-musl }
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: npm-release-candidate
           path: release
@@ -183,7 +183,7 @@ jobs:
         with:
           chrome-version: 151.0.7922.71
           install-dependencies: true
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: npm-release-candidate
           path: release
