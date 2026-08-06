@@ -33,17 +33,15 @@
 	},
 	"types": "./http3.d.ts",
 	"scripts": {
-		"test": "node --test *.test.js",
-		"postinstall": "node install.js"
+		"test": "node --test *.test.js"
 	},
 	"files": [
 		"http3.d.ts",
 		"http3.js",
-		"install-constants.js",
-		"install.js",
 		"LICENSE.md",
 		"NOTICE",
-		"README.md"
+		"README.md",
+		"resolve.js"
 	],
 	"optionalDependencies": {
 		"@http3-server/darwin-arm64": "0.3.1",
