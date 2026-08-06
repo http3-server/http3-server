@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { getPackageForCurrentPlatform } from "../packages/native/install.js";
+import { getPackageForCurrentPlatform } from "../packages/native/resolve.js";
 
 export function run(command, args, options = {}) {
 	const result = spawnSync(command, args, { stdio: "inherit", ...options });
@@ -55,7 +55,7 @@ export function installCandidate(candidateDirectory) {
 		join(root, "package.json"),
 		`${JSON.stringify({ private: true, type: "module", dependencies, optionalDependencies }, null, "\t")}\n`
 	);
-	runNpm(["install", "--offline", "--no-audit", "--no-fund"], {
+	runNpm(["install", "--offline", "--ignore-scripts", "--no-audit", "--no-fund"], {
 		cwd: root,
 		env: {
 			...process.env,

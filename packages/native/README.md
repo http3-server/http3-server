@@ -14,7 +14,9 @@ The eight native packages are optional dependencies. Current npm releases instal
 package matching macOS or Windows on arm64 or x64, or the matching glibc/musl Linux
 target. Older npm releases that do not filter the `libc` package field may retain both
 Linux variants for the current CPU; the loader still selects only the correct one. The
-postinstall check reports a clear error when no supported native runtime is available.
+loader runs no install scripts. It detects the platform and reports actionable errors
+only when the native package is imported, including when optional dependencies were
+omitted or `node_modules` came from another platform.
 
 Every platform package contains a checksummed build manifest tying its native addon,
 MSH3 library, and MsQuic library to one exact producer revision. See the

@@ -1,5 +1,5 @@
 // test-platform.js - Test platform detection
-import { findInstalledPlatformPackage, getPackageForCurrentPlatform } from "../install.js";
+import { findInstalledPlatformPackages, getPackageForCurrentPlatform } from "../resolve.js";
 
 console.log("Testing platform detection...");
 
@@ -8,9 +8,9 @@ try {
 
 	console.log("Platform detection result:", result);
 
-	const installed = findInstalledPlatformPackage();
+	const installed = findInstalledPlatformPackages();
 
-	if (installed) {
+	if (installed.length > 0) {
 		console.log("Found installed platform package:", installed);
 	} else {
 		console.log("No platform packages found in node_modules");
