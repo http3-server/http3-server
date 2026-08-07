@@ -716,4 +716,4 @@ function createAbortError(subject, errorCode) {
 	return error;
 }
 
-export { Connection, fin, Stream, WebTransportSession, WebTransportStream, WebSocketConnection };
+export { Connection, fin, Stream, WebSocketConnection, WebTransportSession, WebTransportStream };
