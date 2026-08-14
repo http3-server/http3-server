@@ -48,11 +48,7 @@ for (const pkg of manifest.packages) {
 		throw new Error(`${pkg.filename} differs from candidate-manifest.json`);
 	}
 	if (pkg.os && pkg.cpu) {
-		if (
-			!pkg.buildManifest ||
-			pkg.buildManifest.formatVersion !== 4 ||
-			pkg.buildManifest.producer !== "msh3-node"
-		) {
+		if (pkg.buildManifest?.formatVersion !== 4 || pkg.buildManifest.producer !== "msh3-node") {
 			throw new Error(`${pkg.name} lacks native build provenance`);
 		}
 		if (!/^[0-9a-f]{40}$/.test(pkg.buildManifest.producerCommit)) {
