@@ -98,6 +98,56 @@ test("serves concurrent HTTP/3 streams and accepts a WebTransport session", {
 	}
 });
 
+test("accepts IPv4 traffic on an IPv4 wildcard listener", { timeout: 15_000 }, async () => {
+	assert.ok(python, "AIOQUIC_PYTHON must name the pinned integration-client interpreter");
+	const server = new HTTP3Server().handle({
+		stream: () => new Response("baseline"),
+		session: () => undefined,
+	});
+	await server.start({ ...config(), address: "0.0.0.0" });
+
+	try {
+		assert.equal(server.address, "0.0.0.0");
+		const result = await execFileAsync(
+			python,
+			[
+				fileURLToPath(new URL("h3-smoke.py", import.meta.url)),
+				"127.0.0.1",
+				String(server.port),
+			],
+			{ timeout: 10_000 }
+		);
+		assert.equal(result.stderr, "");
+	} finally {
+		await server.stop();
+	}
+});
+
+test("accepts IPv4 traffic on a dual-stack wildcard listener", { timeout: 15_000 }, async () => {
+	assert.ok(python, "AIOQUIC_PYTHON must name the pinned integration-client interpreter");
+	const server = new HTTP3Server().handle({
+		stream: () => new Response("baseline"),
+		session: () => undefined,
+	});
+	await server.start({ ...config(), address: "::" });
+
+	try {
+		assert.equal(server.address, "::");
+		const result = await execFileAsync(
+			python,
+			[
+				fileURLToPath(new URL("h3-smoke.py", import.meta.url)),
+				"127.0.0.1",
+				String(server.port),
+			],
+			{ timeout: 10_000 }
+		);
+		assert.equal(result.stderr, "");
+	} finally {
+		await server.stop();
+	}
+});
+
 test("serves WebSockets over HTTP/3 Extended CONNECT", { timeout: 15_000 }, async () => {
 	assert.ok(python, "AIOQUIC_PYTHON must name the pinned integration-client interpreter");
 	const opened = [];

@@ -17,6 +17,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parsePackOutput } from "./parse-pack-output.js";
 import { isCurrentPlatform, platforms } from "./platforms.js";
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -111,7 +112,7 @@ try {
 				},
 			}
 		);
-		const [packed] = JSON.parse(stdout);
+		const packed = parsePackOutput(stdout);
 		if (packed.name !== packageJson.name || packed.version !== packageJson.version) {
 			throw new Error(`${directory} packed unexpected package identity ${packed.id}`);
 		}

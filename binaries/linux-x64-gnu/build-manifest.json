@@ -1,7 +1,7 @@
 {
 	"formatVersion": 4,
 	"producer": "msh3-node",
-	"producerCommit": "6722970f589325f4a29649934297d358e3b97a3f",
+	"producerCommit": "b5e5ce104fec017b0a39eef30575447e1e62efaa",
 	"platform": "linux-x64-gnu",
 	"target": {
 		"os": "linux",
@@ -20,8 +20,8 @@
 	"files": [
 		{
 			"name": "http3.node",
-			"bytes": 333568,
-			"sha256": "d3a1a4d9433728edc49bfc76b9a24299f81476afda0256cb2b98ac3043e26b74",
+			"bytes": 333376,
+			"sha256": "9d66754a7a3a8891cfaa12f73f576af7e04d097d352208f657838615ab11012a",
 			"architecture": "x64"
 		},
 		{
